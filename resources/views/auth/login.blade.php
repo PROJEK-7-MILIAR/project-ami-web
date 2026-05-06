@@ -4,60 +4,79 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Login Athlete</title>
+
   <link rel="stylesheet" href="/css/auth/login.css">
+  <link rel="stylesheet" href="/css/alert-style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
 </head>
 <body>
 
-<div class="container">
+  <div class="container">
 
-  <!-- LEFT (FORM) -->
-  <div class="left">
-    <div class="form-box">
-      <h2>ATLET</h2>
-      <p class="subtitle">Lampaui Batas. Ukir Prestasi. Jadi Juara.</p>
-      <p class="description">Platform manajemen atlet dan pelatih terpadu untuk mengembangkan potensi maksimal Anda</p>
+    <a href="/" class="back-btn">
+      <i class="fas fa-arrow-left"></i>
+    </a>
 
-      <h3>Selamat Datang!</h3>
+    <div class="left">
+      <div class="form-box">
+        <h2>ATLET</h2>
 
-      <form id="loginForm">
-        <div class="input-group">
-          <label>Username</label>
-          <input type="text" id="username" placeholder="Masukkan username" required>
-        </div>
+        <p class="subtitle">
+          Lampaui Batas. Ukir Prestasi. Jadi Juara.
+        </p>
 
-        <div class="input-group">
-          <label>Password</label>
-          <input type="password" id="password" placeholder="Masukkan password" required>
-        </div>
+        <p class="description">
+          Platform manajemen atlet dan pelatih terpadu untuk mengembangkan potensi maksimal Anda
+        </p>
 
-        <div class="options">
-          <label><input type="checkbox"> Remember me</label>
-        </div>
+        <h3>Selamat Datang!</h3>
 
-        <button type="submit">Login</button>
+        <form id="loginForm">
+          <div class="input-group">
+            <label for="username">Username</label>
+            <input type="text" id="username" placeholder="Masukkan username" required>
+          </div>
 
-        <p class="signup">Belum punya akun? <a href="{{ route('register') }}">Daftar</a></p>
+          <div class="input-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" placeholder="Masukkan password" required>
+          </div>
 
-        <hr style="margin: 20px 0; border: none; border-top: 1px solid #ccc;">
+          <div class="options">
+            <label>
+              <input type="checkbox">
+              Remember me
+            </label>
+          </div>
 
-        <p style="font-size: 12px; color: #666; margin-bottom: 10px;">
-          <strong>Demo Akun:</strong><br>
-          Admin: admin / 12345<br>
-          Super Admin: superadmin / super123
-      </form>
+          <button type="submit">Login</button>
+
+          <p class="signup">
+            Belum punya akun? <a href="/auth/register.html">Daftar</a>
+          </p>
+
+          <hr style="margin: 20px 0; border: none; border-top: 1px solid #ccc;">
+
+          <p style="font-size: 12px; color: #666;">
+            <strong>Demo Akun:</strong><br>
+            Admin: admin / 12345<br>
+            Super Admin: superadmin / super123
+          </p>
+        </form>
+      </div>
     </div>
+
+    <div class="right">
+      <div class="overlay">
+        <h1></h1>
+        <h2></h2>
+      </div>
+    </div>
+
   </div>
 
-  <!-- RIGHT (IMAGE) -->
-  <div class="right">
-    <div class="overlay">
-      <h1></h1>
-      <h2></h2>
-    </div>
-  </div>
-
-</div>
-
-<script src="/js/auth/login.js"></script>
+  <script src="/js/custom-alert.js"></script>
+  <script src="/js/auth/login.js"></script>
 </body>
 </html>

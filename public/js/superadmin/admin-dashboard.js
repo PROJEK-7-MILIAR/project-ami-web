@@ -1,309 +1,571 @@
-// Super Admin Dashboard JavaScript
 
 let allKontigen = [];
 let allAdmins = [];
 let activityLog = [];
 let currentMonitoringTab = 'pelatih';
 
-document.addEventListener('DOMContentLoaded', function() {
+const IU_ONLINE_TIMEOUT = 30000;
+
+// =========================================================
+// NOTIFICATION HELPER
+// =========================================================
+
+function notify(message, type = 'info', duration = 2200) {
+  if (typeof showToast === 'function') {
+    return showToast(message, type, duration);
+  }
+
+  alert(message);
+  return Promise.resolve(true);
+}
+
+function askConfirm(message) {
+  if (typeof customConfirm === 'function') {
+    return customConfirm(message);
+  }
+
+  return Promise.resolve(confirm(message));
+}
+
+// =========================================================
+// AUTH CHECK
+// =========================================================
+
+function checkSuperAdminAuth() {
+  const isLoggedIn = localStorage.getItem('isLoggedIn');
+  const userRole = localStorage.getItem('userRole');
+  const userEmail = localStorage.getItem('userEmail');
+  const userUsername = localStorage.getItem('userUsername');
+
+  if (isLoggedIn !== 'true' || (!userEmail && !userUsername)) {
+    notify('Silakan login terlebih dahulu.', 'error', 1200)
+      .then(function () {
+        window.location.href = '/auth/login.html';
+      });
+
+    return false;
+  }
+
+  if (userRole !== 'superadmin' && userUsername !== 'superadmin') {
+    notify('Akses ditolak! Halaman ini hanya untuk Super Admin.', 'error', 1400)
+      .then(function () {
+        window.location.href = '/admin/home.html';
+      });
+
+    return false;
+  }
+
+  return true;
+}
+
+// =========================================================
+// INITIALIZE
+// =========================================================
+
+document.addEventListener('DOMContentLoaded', function () {
+  if (!checkSuperAdminAuth()) return;
+
   loadUserInfo();
   loadAllData();
-  renderDashboard();
   setupEventListeners();
+  renderDashboard();
+
+  setInterval(function () {
+    const activePage = document.querySelector('.page.active');
+
+    if (activePage && activePage.id === 'admin') {
+      renderAdminManagement();
+    }
+  }, 3000);
 });
 
-// Load user info
+// =========================================================
+// USER INFO
+// =========================================================
+
 function loadUserInfo() {
-  const userEmail = localStorage.getItem('userEmail') || 'Unknown';
+  const userInfo = document.getElementById('userInfo');
+
+  if (!userInfo) return;
+
+  const userEmail = localStorage.getItem('userEmail') || 'superadmin@atlet.local';
   const userName = localStorage.getItem('userName') || 'Super Admin';
-  document.getElementById('userInfo').textContent = userName + ' (' + userEmail + ')';
+
+  userInfo.textContent = `${userName} (${userEmail})`;
 }
 
-// Load all data from localStorage
+// =========================================================
+// LOAD & SAVE DATA
+// =========================================================
+
 function loadAllData() {
-  // Load all kontingen
-  const kontigenData = localStorage.getItem('kontigenData');
-  if (kontigenData) {
-    allKontigen = JSON.parse(kontigenData);
+  const savedKontigen = localStorage.getItem('kontigenData');
+  const savedActivity = localStorage.getItem('activityLog');
+
+  try {
+    allKontigen = savedKontigen ? JSON.parse(savedKontigen) : [];
+  } catch (error) {
+    allKontigen = [];
   }
 
-  // Load activity log
-  const savedLog = localStorage.getItem('activityLog');
-  if (savedLog) {
-    activityLog = JSON.parse(savedLog);
+  try {
+    activityLog = savedActivity ? JSON.parse(savedActivity) : [];
+  } catch (error) {
+    activityLog = [];
   }
 
-  // Load admins
-  const savedAdmins = localStorage.getItem('systemAdmins');
-  if (savedAdmins) {
-    allAdmins = JSON.parse(savedAdmins);
-  } else {
-    // Default admins
-    allAdmins = [
-      { username: 'admin', password: '12345', name: 'Admin Pelatih', kontingen: '' },
-      { username: 'pelatih', password: 'password123', name: 'Pelatih', kontingen: '' }
-    ];
-    saveAdmins();
-  }
+  loadAllAdmins();
 }
 
-// Save data
 function saveAllData() {
   localStorage.setItem('kontigenData', JSON.stringify(allKontigen));
   localStorage.setItem('activityLog', JSON.stringify(activityLog));
 }
 
 function saveAdmins() {
-  localStorage.setItem('systemAdmins', JSON.stringify(allAdmins));
+  const customAdmins = allAdmins.filter(function (admin) {
+    return admin.source === 'system';
+  });
+
+  localStorage.setItem('systemAdmins', JSON.stringify(customAdmins));
 }
 
-// Log activity
-function logActivity(type, description, detail = '') {
-  const log = {
-    id: Date.now(),
-    timestamp: new Date().toLocaleString('id-ID'),
-    admin: localStorage.getItem('userEmail'),
-    type: type,
-    description: description,
-    detail: detail
-  };
+// =========================================================
+// ADMIN DATA
+// =========================================================
 
-  activityLog.unshift(log);
-  // Keep only last 100 logs
-  if (activityLog.length > 100) {
-    activityLog = activityLog.slice(0, 100);
-  }
+function loadAllAdmins() {
+  const defaultAdmins = [
+    {
+      username: 'admin',
+      password: '12345',
+      name: 'Admin Pelatih',
+      email: 'admin@atlet.local',
+      role: 'admin',
+      kontingen: '',
+      source: 'default'
+    },
+    {
+      username: 'pelatih',
+      password: 'password123',
+      name: 'Pelatih',
+      email: 'pelatih@atlet.local',
+      role: 'admin',
+      kontingen: '',
+      source: 'default'
+    }
+  ];
 
-  saveAllData();
+  const systemAdmins = JSON.parse(localStorage.getItem('systemAdmins')) || [];
+  const registeredUsers = JSON.parse(localStorage.getItem('users')) || [];
+
+  const normalizedSystemAdmins = systemAdmins.map(function (admin) {
+    return {
+      username: String(admin.username || '').toLowerCase(),
+      password: String(admin.password || ''),
+      name: admin.name || admin.fullname || admin.username,
+      email: String(admin.email || admin.username || '').toLowerCase(),
+      role: admin.role || 'admin',
+      kontingen: admin.kontingen || '',
+      source: 'system'
+    };
+  });
+
+  const normalizedRegisteredUsers = registeredUsers.map(function (user) {
+    return {
+      username: String(user.username || '').toLowerCase(),
+      password: String(user.password || ''),
+      name: user.fullname || user.name || user.username,
+      email: String(user.email || user.username || '').toLowerCase(),
+      role: user.role || 'admin',
+      kontingen: user.kontingen || '',
+      source: 'register'
+    };
+  });
+
+  const merged = [
+    ...defaultAdmins,
+    ...normalizedSystemAdmins,
+    ...normalizedRegisteredUsers
+  ];
+
+  const unique = [];
+
+  merged.forEach(function (admin) {
+    if (!admin.username) return;
+
+    const exists = unique.some(function (item) {
+      return item.username === admin.username;
+    });
+
+    if (!exists) {
+      unique.push(admin);
+    }
+  });
+
+  allAdmins = unique;
 }
 
-// Setup event listeners
+// =========================================================
+// EVENT LISTENERS
+// =========================================================
+
 function setupEventListeners() {
   const addAdminForm = document.getElementById('addAdminForm');
+
   if (addAdminForm) {
-    addAdminForm.addEventListener('submit', function(e) {
+    addAdminForm.addEventListener('submit', function (e) {
       e.preventDefault();
-      addNewAdmin();
+      addAdmin();
     });
   }
+
+  document.addEventListener('click', function (e) {
+    if (e.target.classList.contains('modal')) {
+      e.target.classList.remove('show');
+    }
+  });
 }
 
-// ===== PAGE SWITCHING =====
-function switchPage(pageName) {
-  // Hide all pages
-  document.querySelectorAll('.page').forEach(page => {
+// =========================================================
+// PAGE SWITCHING
+// =========================================================
+
+function switchPage(pageId) {
+  loadAllData();
+
+  document.querySelectorAll('.page').forEach(function (page) {
     page.classList.remove('active');
   });
 
-  // Remove active from all nav items
-  document.querySelectorAll('.nav-item').forEach(item => {
+  document.querySelectorAll('.nav-item').forEach(function (item) {
     item.classList.remove('active');
   });
 
-  // Show selected page
-  const page = document.getElementById(pageName);
+  const page = document.getElementById(pageId);
+
   if (page) {
     page.classList.add('active');
   }
 
-  // Mark nav item active
-  event.target.classList.add('active');
-
-  // Render content
-  switch(pageName) {
-    case 'dashboard':
-      renderDashboard();
-      break;
-    case 'kontingen':
-      renderKontigenManagement();
-      break;
-    case 'admin':
-      renderAdminManagement();
-      break;
-    case 'monitoring':
-      renderMonitoring();
-      break;
-    case 'activity':
-      renderActivityLog();
-      break;
+  if (window.event && window.event.target) {
+    window.event.target.classList.add('active');
   }
+
+  if (pageId === 'dashboard') renderDashboard();
+  if (pageId === 'kontingen') renderKontingenManagement();
+  if (pageId === 'admin') renderAdminManagement();
+  if (pageId === 'monitoring') renderMonitoring();
+  if (pageId === 'activity') renderActivityLog();
 }
 
-// ===== DASHBOARD =====
-function renderDashboard() {
-  // Calculate statistics
-  let totalPelatih = 0;
-  let totalAtlet = 0;
+// =========================================================
+// DASHBOARD
+// =========================================================
 
-  allKontigen.forEach(k => {
-    const data = localStorage.getItem('kontingen_' + k.code);
-    if (data) {
-      const parsed = JSON.parse(data);
-      totalPelatih += (parsed.pelatih || []).length;
-      totalAtlet += (parsed.atlet || []).length;
-    }
+function renderDashboard() {
+  loadAllData();
+
+  const totalKontingen = document.getElementById('totalKontingen');
+  const totalPelatih = document.getElementById('totalPelatih');
+  const totalAtlet = document.getElementById('totalAtlet');
+  const totalAdmin = document.getElementById('totalAdmin');
+
+  let pelatihCount = 0;
+  let atletCount = 0;
+
+  allKontigen.forEach(function (kontigen) {
+    const detail = getKontingenDetail(kontigen.code);
+
+    pelatihCount += (detail.pelatih || []).length;
+    atletCount += (detail.atlet || []).length;
   });
 
-  // Update stat cards
-  document.getElementById('totalKontingen').textContent = allKontigen.length;
-  document.getElementById('totalPelatih').textContent = totalPelatih;
-  document.getElementById('totalAtlet').textContent = totalAtlet;
-  document.getElementById('totalAdmin').textContent = allAdmins.length;
+  if (totalKontingen) totalKontingen.textContent = allKontigen.length;
+  if (totalPelatih) totalPelatih.textContent = pelatihCount;
+  if (totalAtlet) totalAtlet.textContent = atletCount;
+  if (totalAdmin) totalAdmin.textContent = allAdmins.length;
 
-  // Render recent activity
   renderRecentActivity();
 }
 
 function renderRecentActivity() {
   const container = document.getElementById('recentActivity');
-  container.innerHTML = '';
 
-  if (activityLog.length === 0) {
+  if (!container) return;
+
+  const recent = activityLog.slice(0, 5);
+
+  if (recent.length === 0) {
     container.innerHTML = '<div class="empty-state">Belum ada aktivitas</div>';
     return;
   }
 
-  activityLog.slice(0, 10).forEach(log => {
-    const item = document.createElement('div');
-    item.className = 'activity-item';
-    item.innerHTML = `
-      <div class="activity-time">${log.timestamp}</div>
-      <div class="activity-title">${log.admin} - ${log.type}</div>
-      <div class="activity-desc">${log.description}</div>
+  container.innerHTML = recent.map(function (log) {
+    return `
+      <div class="activity-item">
+        <div>
+          <strong>${escapeHTML(log.description || '-')}</strong>
+          <p>${escapeHTML(log.timestamp || '-')} - ${escapeHTML(log.admin || '-')}</p>
+        </div>
+        <span class="activity-type">${escapeHTML(log.type || 'info')}</span>
+      </div>
     `;
-    container.appendChild(item);
-  });
+  }).join('');
 }
 
-// ===== KONTINGEN MANAGEMENT =====
-function renderKontigenManagement() {
+// =========================================================
+// KONTINGEN MANAGEMENT
+// =========================================================
+
+function renderKontingenManagement() {
   const container = document.getElementById('kontiigenList');
-  container.innerHTML = '';
+
+  if (!container) return;
+
+  loadAllData();
 
   if (allKontigen.length === 0) {
-    container.innerHTML = '<div class="empty-state">Tidak ada kontingen</div>';
+    container.innerHTML = '<div class="empty-state">Belum ada kontingen</div>';
     return;
   }
 
-  allKontigen.forEach(kontigen => {
-    // Get kontingen data
-    const data = localStorage.getItem('kontingen_' + kontigen.code);
-    let pelatih = 0, atlet = 0;
+  container.innerHTML = '';
 
-    if (data) {
-      const parsed = JSON.parse(data);
-      pelatih = (parsed.pelatih || []).length;
-      atlet = (parsed.atlet || []).length;
-    }
+  allKontigen.forEach(function (kontigen) {
+    const detail = getKontingenDetail(kontigen.code);
 
     const item = document.createElement('div');
-    item.className = 'kontingen-item';
+    item.className = 'kontingen-admin-card';
+
     item.innerHTML = `
-      <div class="kontingen-info">
-        <h4>${kontigen.name}</h4>
-        <p><strong>Kode:</strong> ${kontigen.code}</p>
-        <p><strong>Pemilik:</strong> ${kontigen.owner}</p>
-        <p><strong>Pelatih:</strong> ${pelatih} | <strong>Atlet:</strong> ${atlet}</p>
-        <p style="font-size: 12px; color: #999;">Dibuat: ${kontigen.created}</p>
+      <div class="kontingen-admin-info">
+        <h3>${escapeHTML(kontigen.name || '-')}</h3>
+        <p><strong>Kode:</strong> ${escapeHTML(kontigen.code || '-')}</p>
+        <p><strong>Pemilik:</strong> ${escapeHTML(kontigen.ownerName || kontigen.owner || '-')}</p>
+        <p><strong>Alamat:</strong> ${escapeHTML(kontigen.address || '-')}</p>
+        <p><strong>Jumlah Pelatih:</strong> ${(detail.pelatih || []).length}</p>
+        <p><strong>Jumlah Atlet:</strong> ${(detail.atlet || []).length}</p>
       </div>
-      <div class="kontingen-actions">
-        <button class="btn-secondary" onclick="viewKontigenDetail('${kontigen.code}')">View</button>
-        <button class="btn-danger" onclick="deleteKontigen('${kontigen.code}')">Delete</button>
+
+      <div class="kontingen-admin-actions">
+        <button class="btn-danger" onclick="deleteKontingenBySuperAdmin(${kontigen.id})">
+          🗑 Hapus
+        </button>
       </div>
     `;
+
     container.appendChild(item);
   });
 }
 
-function deleteKontigen(code) {
-  if (confirm('Yakin ingin menghapus kontingen ini? Data akan hilang!')) {
-    allKontigen = allKontigen.filter(k => k.code !== code);
-    localStorage.removeItem('kontingen_' + code);
-    saveAllData();
-    logActivity('delete', `Menghapus kontingen ${code}`);
-    renderKontigenManagement();
-    alert('✅ Kontingen dihapus');
-  }
-}
+function deleteKontingenBySuperAdmin(id) {
+  const kontigen = allKontigen.find(function (item) {
+    return item.id === id;
+  });
 
-// ===== ADMIN MANAGEMENT =====
-function renderAdminManagement() {
-  const tbody = document.getElementById('adminList');
-  tbody.innerHTML = '';
-
-  if (allAdmins.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="5" class="empty-state">Tidak ada admin</td></tr>';
+  if (!kontigen) {
+    notify('Kontingen tidak ditemukan.', 'error');
     return;
   }
 
-  allAdmins.forEach(admin => {
+  askConfirm(`Yakin ingin menghapus kontingen "${kontigen.name}"? Semua data di dalamnya akan ikut terhapus.`)
+    .then(function (confirmed) {
+      if (!confirmed) return;
+
+      allKontigen = allKontigen.filter(function (item) {
+        return item.id !== id;
+      });
+
+      localStorage.removeItem('kontingen_' + kontigen.code);
+      localStorage.setItem('kontigenData', JSON.stringify(allKontigen));
+
+      logActivity('delete', `Super Admin menghapus kontingen: ${kontigen.name}`, `Kode: ${kontigen.code}`);
+
+      renderKontingenManagement();
+      renderDashboard();
+
+      notify('Kontingen berhasil dihapus.', 'success');
+    });
+}
+
+// =========================================================
+// ADMIN MANAGEMENT
+// =========================================================
+
+function openAddAdminModal() {
+  const modal = document.getElementById('addAdminModal');
+
+  if (modal) {
+    modal.classList.add('show');
+  }
+}
+
+function closeModal(modalId) {
+  const modal = document.getElementById(modalId);
+
+  if (modal) {
+    modal.classList.remove('show');
+  }
+}
+
+function renderAdminManagement() {
+  const tbody = document.getElementById('adminList');
+
+  if (!tbody) return;
+
+  loadAllData();
+
+  if (allAdmins.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="5" class="empty-state">Belum ada admin</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = '';
+
+  allAdmins.forEach(function (admin) {
+    const online = IU_isAdminOnline(admin);
+    const onlineData = IU_findOnlineData(admin);
+
     const row = document.createElement('tr');
+
     row.innerHTML = `
-      <td>${admin.username}</td>
-      <td>${admin.name}</td>
-      <td><span style="background: #22c55e; color: white; padding: 4px 8px; border-radius: 4px;">Active</span></td>
-      <td>${admin.kontingen || '-'}</td>
+      <td>${escapeHTML(admin.username || '-')}</td>
+      <td>${escapeHTML(admin.name || '-')}</td>
       <td>
-        <button class="btn-secondary" onclick="editAdmin('${admin.username}')" style="margin-right: 5px;">Edit</button>
-        <button class="btn-danger" onclick="deleteAdmin('${admin.username}')">Delete</button>
+        <span class="status-badge ${online ? 'online' : 'offline'}">
+          ${online ? 'Online' : 'Offline'}
+        </span>
+        <br>
+        <small>${online ? 'Aktif sekarang' : 'Terakhir: ' + IU_formatLastSeen(onlineData?.lastSeen)}</small>
+      </td>
+      <td>${escapeHTML(admin.kontingen || '-')}</td>
+      <td>
+        ${
+          admin.source === 'default'
+            ? '<button disabled style="opacity: .5; cursor: not-allowed;">Default</button>'
+            : `<button class="btn-danger" onclick="deleteAdmin('${escapeHTML(admin.username)}')">Hapus</button>`
+        }
       </td>
     `;
+
     tbody.appendChild(row);
   });
 }
 
-function openAddAdminModal() {
-  document.getElementById('addAdminForm').reset();
-  document.getElementById('addAdminModal').classList.add('show');
-}
+function addAdmin() {
+  const usernameInput = document.getElementById('newUsername');
+  const passwordInput = document.getElementById('newPassword');
+  const nameInput = document.getElementById('newName');
 
-function closeModal(modalId) {
-  document.getElementById(modalId).classList.remove('show');
-}
-
-function addNewAdmin() {
-  const username = document.getElementById('newUsername').value;
-  const password = document.getElementById('newPassword').value;
-  const name = document.getElementById('newName').value;
+  const username = usernameInput.value.trim().toLowerCase();
+  const password = passwordInput.value.trim();
+  const name = nameInput.value.trim();
 
   if (!username || !password || !name) {
-    alert('Semua field harus diisi!');
+    notify('Username, password, dan nama wajib diisi.', 'warning');
     return;
   }
 
-  // Check if username already exists
-  if (allAdmins.find(a => a.username === username)) {
-    alert('Username sudah terdaftar!');
+  if (username.length < 3) {
+    notify('Username minimal 3 karakter.', 'warning');
+    return;
+  }
+
+  if (password.length < 5) {
+    notify('Password minimal 5 karakter.', 'warning');
+    return;
+  }
+
+  loadAllData();
+
+  const exists = allAdmins.some(function (admin) {
+    return admin.username === username;
+  });
+
+  if (exists || username === 'superadmin') {
+    notify('Username sudah digunakan.', 'error');
     return;
   }
 
   const newAdmin = {
+    id: Date.now(),
     username: username,
     password: password,
     name: name,
-    kontingen: ''
+    email: username + '@atlet.local',
+    role: 'admin',
+    kontingen: '',
+    source: 'system',
+    createdAt: new Date().toISOString()
   };
 
-  allAdmins.push(newAdmin);
-  saveAdmins();
-  logActivity('create', `Menambahkan admin baru: ${username}`);
+  const systemAdmins = JSON.parse(localStorage.getItem('systemAdmins')) || [];
+  systemAdmins.push(newAdmin);
+
+  localStorage.setItem('systemAdmins', JSON.stringify(systemAdmins));
+
+  logActivity('create', `Menambahkan admin baru: ${name}`, `Username: ${username}`);
 
   closeModal('addAdminModal');
+
+  const form = document.getElementById('addAdminForm');
+
+  if (form) {
+    form.reset();
+  }
+
+  loadAllData();
   renderAdminManagement();
-  alert('✅ Admin baru ditambahkan');
+  renderDashboard();
+
+  notify('Admin baru berhasil ditambahkan.', 'success');
 }
 
 function deleteAdmin(username) {
-  if (confirm('Yakin ingin menghapus admin ini?')) {
-    allAdmins = allAdmins.filter(a => a.username !== username);
-    saveAdmins();
-    logActivity('delete', `Menghapus admin: ${username}`);
-    renderAdminManagement();
-    alert('✅ Admin dihapus');
+  if (username === 'admin' || username === 'pelatih') {
+    notify('Admin default tidak bisa dihapus.', 'error');
+    return;
   }
+
+  askConfirm(`Yakin ingin menghapus admin "${username}"?`)
+    .then(function (confirmed) {
+      if (!confirmed) return;
+
+      let systemAdmins = JSON.parse(localStorage.getItem('systemAdmins')) || [];
+      let registeredUsers = JSON.parse(localStorage.getItem('users')) || [];
+      let onlineUsers = JSON.parse(localStorage.getItem('onlineUsers')) || [];
+
+      systemAdmins = systemAdmins.filter(function (admin) {
+        return admin.username !== username;
+      });
+
+      registeredUsers = registeredUsers.filter(function (user) {
+        return user.username !== username;
+      });
+
+      onlineUsers = onlineUsers.filter(function (user) {
+        return user.username !== username;
+      });
+
+      localStorage.setItem('systemAdmins', JSON.stringify(systemAdmins));
+      localStorage.setItem('users', JSON.stringify(registeredUsers));
+      localStorage.setItem('onlineUsers', JSON.stringify(onlineUsers));
+
+      logActivity('delete', `Menghapus admin: ${username}`);
+
+      loadAllData();
+      renderAdminManagement();
+      renderDashboard();
+
+      notify('Admin berhasil dihapus.', 'success');
+    });
 }
 
-// ===== MONITORING =====
+// =========================================================
+// MONITORING
+// =========================================================
+
 function renderMonitoring() {
   switchMonitoringTab('pelatih');
 }
@@ -311,56 +573,115 @@ function renderMonitoring() {
 function switchMonitoringTab(tab) {
   currentMonitoringTab = tab;
 
-  // Update button active state
-  document.querySelectorAll('.tab-button').forEach(btn => {
+  document.querySelectorAll('.tab-button').forEach(function (btn) {
     btn.classList.remove('active');
   });
-  event.target.classList.add('active');
 
-  // Render content
+  if (window.event && window.event.target) {
+    window.event.target.classList.add('active');
+  }
+
   const container = document.getElementById('monitoringContent');
-  container.innerHTML = '';
+
+  if (!container) return;
+
+  loadAllData();
 
   let html = '';
 
   if (tab === 'pelatih') {
-    html = '<h3>📊 Daftar Semua Pelatih</h3><table class="admin-table"><thead><tr><th>Kontingen</th><th>Nama</th><th>Usia</th><th>TTL</th></tr></thead><tbody>';
+    html = `
+      <h3>📊 Daftar Semua Pelatih</h3>
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Kontingen</th>
+            <th>Nama</th>
+            <th>Usia</th>
+            <th>TTL</th>
+            <th>Dibuat Oleh</th>
+          </tr>
+        </thead>
+        <tbody>
+    `;
 
-    allKontigen.forEach(k => {
-      const data = localStorage.getItem('kontingen_' + k.code);
-      if (data) {
-        const parsed = JSON.parse(data);
-        (parsed.pelatih || []).forEach(p => {
-          html += `<tr><td>${k.name}</td><td>${p.nama}</td><td>${p.usia || '-'}</td><td>${p.ttl || '-'}</td></tr>`;
-        });
-      }
+    allKontigen.forEach(function (kontigen) {
+      const detail = getKontingenDetail(kontigen.code);
+
+      (detail.pelatih || []).forEach(function (pelatih) {
+        html += `
+          <tr>
+            <td>${escapeHTML(kontigen.name || '-')}</td>
+            <td>${escapeHTML(pelatih.nama || '-')}</td>
+            <td>${escapeHTML(pelatih.usia || '-')}</td>
+            <td>${escapeHTML(pelatih.ttl || '-')}</td>
+            <td>${escapeHTML(pelatih.createdByName || pelatih.createdBy || '-')}</td>
+          </tr>
+        `;
+      });
     });
 
     html += '</tbody></table>';
-  } else if (tab === 'atlet') {
-    html = '<h3>📊 Daftar Semua Atlet</h3><table class="admin-table"><thead><tr><th>Kontingen</th><th>Nama</th><th>Usia</th><th>TTL</th></tr></thead><tbody>';
+  }
 
-    allKontigen.forEach(k => {
-      const data = localStorage.getItem('kontingen_' + k.code);
-      if (data) {
-        const parsed = JSON.parse(data);
-        (parsed.atlet || []).forEach(a => {
-          html += `<tr><td>${k.name}</td><td>${a.nama}</td><td>${a.usia || '-'}</td><td>${a.ttl || '-'}</td></tr>`;
-        });
-      }
+  if (tab === 'atlet') {
+    html = `
+      <h3>📊 Daftar Semua Atlet</h3>
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Kontingen</th>
+            <th>Nama</th>
+            <th>Usia</th>
+            <th>TTL</th>
+            <th>Dibuat Oleh</th>
+          </tr>
+        </thead>
+        <tbody>
+    `;
+
+    allKontigen.forEach(function (kontigen) {
+      const detail = getKontingenDetail(kontigen.code);
+
+      (detail.atlet || []).forEach(function (atlet) {
+        html += `
+          <tr>
+            <td>${escapeHTML(kontigen.name || '-')}</td>
+            <td>${escapeHTML(atlet.nama || '-')}</td>
+            <td>${escapeHTML(atlet.usia || '-')}</td>
+            <td>${escapeHTML(atlet.ttl || '-')}</td>
+            <td>${escapeHTML(atlet.createdByName || atlet.createdBy || '-')}</td>
+          </tr>
+        `;
+      });
     });
 
     html += '</tbody></table>';
-  } else if (tab === 'absensi') {
-    html = '<h3>📊 Ringkasan Absensi</h3><table class="admin-table"><thead><tr><th>Kontingen</th><th>Total Record</th></tr></thead><tbody>';
+  }
 
-    allKontigen.forEach(k => {
-      const data = localStorage.getItem('kontingen_' + k.code);
-      if (data) {
-        const parsed = JSON.parse(data);
-        const total = Object.keys(parsed.absensi || {}).length;
-        html += `<tr><td>${k.name}</td><td>${total}</td></tr>`;
-      }
+  if (tab === 'absensi') {
+    html = `
+      <h3>📊 Ringkasan Absensi</h3>
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Kontingen</th>
+            <th>Total Record</th>
+          </tr>
+        </thead>
+        <tbody>
+    `;
+
+    allKontigen.forEach(function (kontigen) {
+      const detail = getKontingenDetail(kontigen.code);
+      const total = Object.keys(detail.absensi || {}).length;
+
+      html += `
+        <tr>
+          <td>${escapeHTML(kontigen.name || '-')}</td>
+          <td>${total}</td>
+        </tr>
+      `;
     });
 
     html += '</tbody></table>';
@@ -369,103 +690,168 @@ function switchMonitoringTab(tab) {
   container.innerHTML = html;
 }
 
-// ===== ACTIVITY LOG =====
+// =========================================================
+// ACTIVITY LOG
+// =========================================================
+
 function renderActivityLog() {
   const tbody = document.getElementById('activityLog');
-  tbody.innerHTML = '';
+
+  if (!tbody) return;
+
+  loadAllData();
 
   if (activityLog.length === 0) {
     tbody.innerHTML = '<tr><td colspan="5" class="empty-state">Tidak ada log aktivitas</td></tr>';
     return;
   }
 
-  activityLog.forEach(log => {
-    const row = document.createElement('tr');
-    row.innerHTML = `
-      <td>${log.timestamp}</td>
-      <td>${log.admin}</td>
-      <td>${log.type}</td>
-      <td>${log.description}</td>
-      <td><small>${log.detail}</small></td>
+  tbody.innerHTML = activityLog.map(function (log) {
+    return `
+      <tr>
+        <td>${escapeHTML(log.timestamp || '-')}</td>
+        <td>${escapeHTML(log.admin || '-')}</td>
+        <td>${escapeHTML(log.type || '-')}</td>
+        <td>${escapeHTML(log.description || '-')}</td>
+        <td>${escapeHTML(log.detail || '-')}</td>
+      </tr>
     `;
-    tbody.appendChild(row);
-  });
+  }).join('');
 }
 
 function filterActivity() {
-  const date = document.getElementById('filterDate').value;
-  const type = document.getElementById('filterType').value;
-
-  const filtered = activityLog.filter(log => {
-    const logDate = log.timestamp.split(' ')[0];
-    const matchDate = !date || logDate === date;
-    const matchType = !type || log.type === type;
-    return matchDate && matchType;
-  });
-
+  const filterDate = document.getElementById('filterDate')?.value || '';
+  const filterType = document.getElementById('filterType')?.value || '';
   const tbody = document.getElementById('activityLog');
-  tbody.innerHTML = '';
+
+  if (!tbody) return;
+
+  loadAllData();
+
+  let filtered = activityLog;
+
+  if (filterType) {
+    filtered = filtered.filter(function (log) {
+      return log.type === filterType;
+    });
+  }
+
+  if (filterDate) {
+    const selectedDate = new Date(filterDate).toLocaleDateString('id-ID');
+
+    filtered = filtered.filter(function (log) {
+      return String(log.timestamp || '').includes(selectedDate);
+    });
+  }
 
   if (filtered.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="5" class="empty-state">Tidak ada log yang sesuai</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="5" class="empty-state">Tidak ada data sesuai filter</td></tr>';
     return;
   }
 
-  filtered.forEach(log => {
-    const row = document.createElement('tr');
-    row.innerHTML = `
-      <td>${log.timestamp}</td>
-      <td>${log.admin}</td>
-      <td>${log.type}</td>
-      <td>${log.description}</td>
-      <td><small>${log.detail}</small></td>
+  tbody.innerHTML = filtered.map(function (log) {
+    return `
+      <tr>
+        <td>${escapeHTML(log.timestamp || '-')}</td>
+        <td>${escapeHTML(log.admin || '-')}</td>
+        <td>${escapeHTML(log.type || '-')}</td>
+        <td>${escapeHTML(log.description || '-')}</td>
+        <td>${escapeHTML(log.detail || '-')}</td>
+      </tr>
     `;
-    tbody.appendChild(row);
-  });
+  }).join('');
 }
 
-// ===== EXPORT DATA =====
-function exportData(type, format) {
-  let data = [];
-  let filename = `export_${type}_${new Date().getTime()}`;
+// =========================================================
+// EXPORT DATA
+// =========================================================
 
-  if (type === 'atlet') {
-    allKontigen.forEach(k => {
-      const kontigenData = localStorage.getItem('kontingen_' + k.code);
-      if (kontigenData) {
-        const parsed = JSON.parse(kontigenData);
-        (parsed.atlet || []).forEach(a => {
-          data.push({
-            'Kontingen': k.name,
-            'Nama': a.nama,
-            'Usia': a.usia,
-            'TTL': a.ttl,
-            'Prestasi': a.prestasi
-          });
+function exportData(type, format) {
+  loadAllData();
+
+  let data = [];
+  let filename = `${type}_${Date.now()}`;
+
+  allKontigen.forEach(function (kontigen) {
+    const detail = getKontingenDetail(kontigen.code);
+
+    if (type === 'atlet') {
+      (detail.atlet || []).forEach(function (atlet) {
+        data.push({
+          Kontingen: kontigen.name || '',
+          Nama: atlet.nama || '',
+          Usia: atlet.usia || '',
+          TTL: atlet.ttl || '',
+          Prestasi: atlet.prestasi || '',
+          DibuatOleh: atlet.createdByName || atlet.createdBy || ''
         });
-      }
-    });
-  } else if (type === 'jadwal') {
-    allKontigen.forEach(k => {
-      const kontigenData = localStorage.getItem('kontingen_' + k.code);
-      if (kontigenData) {
-        const parsed = JSON.parse(kontigenData);
-        (parsed.jadwal || []).forEach(j => {
-          data.push({
-            'Kontingen': k.name,
-            'Nama Pertandingan': j.nama,
-            'Tanggal': j.tanggal,
-            'Jam': j.jam,
-            'Tempat': j.tempat
-          });
+      });
+    }
+
+    if (type === 'pelatih') {
+      (detail.pelatih || []).forEach(function (pelatih) {
+        data.push({
+          Kontingen: kontigen.name || '',
+          Nama: pelatih.nama || '',
+          Usia: pelatih.usia || '',
+          TTL: pelatih.ttl || '',
+          Prestasi: pelatih.prestasi || '',
+          DibuatOleh: pelatih.createdByName || pelatih.createdBy || ''
         });
-      }
-    });
-  }
+      });
+    }
+
+    if (type === 'jadwal') {
+      (detail.jadwal || []).forEach(function (jadwal) {
+        data.push({
+          Kontingen: kontigen.name || '',
+          No: jadwal.no || '',
+          NamaPertandingan: jadwal.nama || '',
+          Tanggal: jadwal.tanggal || '',
+          Jam: jadwal.jam || '',
+          Tempat: jadwal.tempat || '',
+          DibuatOleh: jadwal.createdByName || jadwal.createdBy || ''
+        });
+      });
+    }
+
+    if (type === 'program') {
+      (detail.program || []).forEach(function (program) {
+        data.push({
+          Kontingen: kontigen.name || '',
+          NamaProgram: program.nama || '',
+          File: program.fileName || '',
+          TanggalUpload: program.uploadDate || '',
+          Deskripsi: program.desc || '',
+          DibuatOleh: program.createdByName || program.createdBy || ''
+        });
+      });
+    }
+
+    if (type === 'absensi') {
+      Object.keys(detail.absensi || {}).forEach(function (key) {
+        const record = detail.absensi[key];
+
+        data.push({
+          Kontingen: kontigen.name || '',
+          Key: key,
+          Status: typeof record === 'string' ? record : record.status || '',
+          DibuatOleh: typeof record === 'object' ? record.createdByName || record.createdBy || '' : ''
+        });
+      });
+    }
+
+    if (type === 'pengukuran') {
+      data.push({
+        Kontingen: kontigen.name || '',
+        Keterangan: 'Data hasil tes pengukuran belum tersedia pada struktur data saat ini'
+      });
+    }
+  });
 
   if (format === 'csv') {
     exportCSV(data, filename);
-  } else if (format === 'excel') {
+  } else {
     exportExcel(data, filename);
   }
 
@@ -474,104 +860,129 @@ function exportData(type, format) {
 
 function exportCSV(data, filename) {
   if (data.length === 0) {
-    alert('Tidak ada data untuk di-export');
+    notify('Tidak ada data untuk di-export.', 'warning');
     return;
   }
 
   const headers = Object.keys(data[0]);
   let csv = headers.join(',') + '\n';
 
-  data.forEach(row => {
-    const values = headers.map(h => `"${row[h] || ''}"`);
+  data.forEach(function (row) {
+    const values = headers.map(function (header) {
+      return `"${String(row[header] || '').replaceAll('"', '""')}"`;
+    });
+
     csv += values.join(',') + '\n';
   });
 
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-  const link = document.createElement('a');
-  link.href = URL.createObjectURL(blob);
-  link.download = filename + '.csv';
-  link.click();
+  downloadTextFile(csv, filename + '.csv', 'text/csv;charset=utf-8;');
+  notify('Data CSV berhasil didownload.', 'success');
 }
 
 function exportExcel(data, filename) {
   if (data.length === 0) {
-    alert('Tidak ada data untuk di-export');
+    notify('Tidak ada data untuk di-export.', 'warning');
     return;
   }
 
-  // Simple Excel-like format (CSV with .xls extension)
   const headers = Object.keys(data[0]);
   let content = headers.join('\t') + '\n';
 
-  data.forEach(row => {
-    const values = headers.map(h => row[h] || '');
+  data.forEach(function (row) {
+    const values = headers.map(function (header) {
+      return String(row[header] || '');
+    });
+
     content += values.join('\t') + '\n';
   });
 
-  const blob = new Blob([content], { type: 'application/vnd.ms-excel;charset=utf-8;' });
-  const link = document.createElement('a');
-  link.href = URL.createObjectURL(blob);
-  link.download = filename + '.xls';
-  link.click();
+  downloadTextFile(content, filename + '.xls', 'application/vnd.ms-excel;charset=utf-8;');
+  notify('Data Excel berhasil didownload.', 'success');
 }
 
-// ===== SETTINGS =====
+function downloadTextFile(content, filename, type) {
+  const blob = new Blob([content], { type: type });
+  const link = document.createElement('a');
+
+  link.href = URL.createObjectURL(blob);
+  link.download = filename;
+
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
+// =========================================================
+// SETTINGS
+// =========================================================
+
 function backupData() {
+  loadAllData();
+
   const backup = {
     kontigen: allKontigen,
-    admins: allAdmins,
+    admins: JSON.parse(localStorage.getItem('systemAdmins')) || [],
+    users: JSON.parse(localStorage.getItem('users')) || [],
     activity: activityLog,
+    onlineUsers: JSON.parse(localStorage.getItem('onlineUsers')) || [],
     timestamp: new Date().toLocaleString('id-ID')
   };
 
-  // Backup all kontingen data
-  allKontigen.forEach(k => {
-    backup['kontingen_' + k.code] = localStorage.getItem('kontingen_' + k.code);
+  allKontigen.forEach(function (kontigen) {
+    backup['kontingen_' + kontigen.code] = localStorage.getItem('kontingen_' + kontigen.code);
   });
 
-  const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+  const blob = new Blob([JSON.stringify(backup, null, 2)], {
+    type: 'application/json'
+  });
+
   const link = document.createElement('a');
   link.href = URL.createObjectURL(blob);
   link.download = 'athlete_backup_' + Date.now() + '.json';
   link.click();
 
   logActivity('backup', 'Backup data sistem');
-  alert('✅ Backup berhasil didownload');
+
+  notify('Backup berhasil didownload.', 'success');
 }
 
 function restoreData() {
   const input = document.createElement('input');
+
   input.type = 'file';
   input.accept = '.json';
 
-  input.onchange = function(e) {
+  input.onchange = function (e) {
     const file = e.target.files[0];
+
+    if (!file) return;
+
     const reader = new FileReader();
 
-    reader.onload = function(event) {
+    reader.onload = function (event) {
       try {
         const backup = JSON.parse(event.target.result);
 
-        // Restore data
         allKontigen = backup.kontigen || [];
-        allAdmins = backup.admins || [];
         activityLog = backup.activity || [];
 
-        saveAllData();
-        saveAdmins();
+        localStorage.setItem('kontigenData', JSON.stringify(allKontigen));
+        localStorage.setItem('activityLog', JSON.stringify(activityLog));
+        localStorage.setItem('systemAdmins', JSON.stringify(backup.admins || []));
+        localStorage.setItem('users', JSON.stringify(backup.users || []));
 
-        // Restore kontingen data
-        Object.keys(backup).forEach(key => {
+        Object.keys(backup).forEach(function (key) {
           if (key.startsWith('kontingen_')) {
             localStorage.setItem(key, backup[key]);
           }
         });
 
-        logActivity('restore', 'Restore data dari backup');
-        alert('✅ Data berhasil di-restore');
-        location.reload();
+        loadAllData();
+        renderDashboard();
+
+        notify('Data berhasil direstore.', 'success');
       } catch (error) {
-        alert('❌ Error membaca file backup: ' + error.message);
+        notify('File backup tidak valid.', 'error');
       }
     };
 
@@ -582,34 +993,182 @@ function restoreData() {
 }
 
 function clearOldLogs() {
-  if (confirm('Yakin ingin menghapus log aktivitas lama? (Keep 50 terbaru)')) {
-    if (activityLog.length > 50) {
-      activityLog = activityLog.slice(0, 50);
-      saveAllData();
-      logActivity('system', 'Membersihkan log lama');
-      alert('✅ Log lama dihapus');
-    } else {
-      alert('Tidak ada log yang perlu dihapus');
-    }
-  }
+  askConfirm('Yakin ingin menghapus log aktivitas lama? Sistem akan menyimpan 50 log terbaru.')
+    .then(function (confirmed) {
+      if (!confirmed) return;
+
+      if (activityLog.length > 50) {
+        activityLog = activityLog.slice(0, 50);
+        saveAllData();
+        logActivity('system', 'Membersihkan log lama');
+
+        renderActivityLog();
+
+        notify('Log lama berhasil dihapus.', 'success');
+      } else {
+        notify('Tidak ada log yang perlu dihapus.', 'info');
+      }
+    });
 }
 
 function clearAllData() {
-  if (confirm('⚠️ PERHATIAN: Ini akan menghapus SEMUA data!\n\nApakah Anda yakin?')) {
-    if (confirm('Ini adalah operasi terakhir! Tekan OK untuk mengkonfirmasi.')) {
-      localStorage.clear();
-      alert('✅ Semua data dihapus. Halaman akan di-reload...');
-      location.reload();
-    }
+  askConfirm('PERHATIAN: Ini akan menghapus SEMUA data. Apakah Anda yakin?')
+    .then(function (confirmed) {
+      if (!confirmed) return;
+
+      askConfirm('Konfirmasi terakhir. Semua data akan hilang dari localStorage.')
+        .then(function (finalConfirmed) {
+          if (!finalConfirmed) return;
+
+          localStorage.clear();
+
+          notify('Semua data dihapus. Halaman akan dimuat ulang.', 'success', 1000)
+            .then(function () {
+              location.reload();
+            });
+        });
+    });
+}
+
+// =========================================================
+// LOGOUT
+// =========================================================
+
+function logout() {
+  askConfirm('Yakin ingin logout?')
+    .then(function (confirmed) {
+      if (!confirmed) return;
+
+      const username = localStorage.getItem('userUsername');
+      const email = localStorage.getItem('userEmail');
+
+      let onlineUsers = JSON.parse(localStorage.getItem('onlineUsers')) || [];
+
+      onlineUsers = onlineUsers.filter(function (user) {
+        return user.username !== username && user.email !== email;
+      });
+
+      localStorage.setItem('onlineUsers', JSON.stringify(onlineUsers));
+
+      localStorage.removeItem('isLoggedIn');
+      localStorage.removeItem('userEmail');
+      localStorage.removeItem('userUsername');
+      localStorage.removeItem('userRole');
+      localStorage.removeItem('userName');
+      localStorage.removeItem('currentKontigen');
+
+      notify('Anda berhasil logout.', 'success', 900)
+        .then(function () {
+          window.location.href = '/auth/login.html';
+        });
+    });
+}
+
+// =========================================================
+// ONLINE STATUS
+// =========================================================
+
+function IU_getOnlineUsers() {
+  return JSON.parse(localStorage.getItem('onlineUsers')) || [];
+}
+
+function IU_findOnlineData(admin) {
+  const onlineUsers = IU_getOnlineUsers();
+
+  return onlineUsers.find(function (user) {
+    return user.username === admin.username || user.email === admin.email;
+  });
+}
+
+function IU_isAdminOnline(admin) {
+  const onlineData = IU_findOnlineData(admin);
+
+  if (!onlineData || !onlineData.lastSeen) {
+    return false;
+  }
+
+  const lastSeenTime = new Date(onlineData.lastSeen).getTime();
+  const now = new Date().getTime();
+
+  return now - lastSeenTime <= IU_ONLINE_TIMEOUT;
+}
+
+function IU_formatLastSeen(dateString) {
+  if (!dateString) return '-';
+
+  const date = new Date(dateString);
+
+  if (isNaN(date)) return '-';
+
+  return date.toLocaleString('id-ID', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+}
+
+// =========================================================
+// ACTIVITY
+// =========================================================
+
+function logActivity(type, description, detail = '') {
+  const log = {
+    id: Date.now(),
+    timestamp: new Date().toLocaleString('id-ID'),
+    admin: localStorage.getItem('userUsername') || localStorage.getItem('userEmail') || 'Super Admin',
+    type: type,
+    description: description,
+    detail: detail
+  };
+
+  activityLog.unshift(log);
+
+  if (activityLog.length > 150) {
+    activityLog = activityLog.slice(0, 150);
+  }
+
+  localStorage.setItem('activityLog', JSON.stringify(activityLog));
+}
+
+// =========================================================
+// HELPER
+// =========================================================
+
+function getKontingenDetail(code) {
+  const saved = localStorage.getItem('kontingen_' + code);
+
+  if (!saved) {
+    return {
+      pelatih: [],
+      atlet: [],
+      program: [],
+      laporanBulanan: [],
+      jadwal: [],
+      absensi: {}
+    };
+  }
+
+  try {
+    return JSON.parse(saved);
+  } catch (error) {
+    return {
+      pelatih: [],
+      atlet: [],
+      program: [],
+      laporanBulanan: [],
+      jadwal: [],
+      absensi: {}
+    };
   }
 }
 
-// ===== UTILITIES =====
-function logout() {
-  if (confirm('Yakin ingin logout?')) {
-    localStorage.removeItem('userEmail');
-    localStorage.removeItem('userRole');
-    localStorage.removeItem('userName');
-    window.location.href = '../login';
-  }
+function escapeHTML(value) {
+  return String(value || '')
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#039;');
 }

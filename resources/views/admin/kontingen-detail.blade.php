@@ -1,299 +1,440 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Detail Kontingen - AMI Training Center</title>
+  <title>Detail Kontingen - ATLET</title>
+
   <link rel="stylesheet" href="/css/admin/kontingen-detail-styles.css">
+  <link rel="stylesheet" href="/css/alert-style.css">
 </head>
+
 <body>
 
-<!-- HEADER -->
-<header class="header">
-  <div class="header-content">
-    <div class="logo">
-      <h1>🏅 ATLET</h1>
+  <header class="header">
+    <div class="header-content">
+      <div class="logo">
+        <h1>🏅 ATLET</h1>
+      </div>
+
+      <div class="header-actions">
+        <span class="user-info" id="userInfo">Admin User</span>
+        <button class="logout-btn" onclick="logout()">Logout</button>
+      </div>
     </div>
-    <div class="header-actions">
-      <span class="user-info" id="userInfo">Admin User</span>
-      <button class="logout-btn" onclick="logout()">Logout</button>
-    </div>
-  </div>
-</header>
+  </header>
 
-<!-- NAVIGATION BREADCRUMB -->
-<div class="breadcrumb">
-  <div class="breadcrumb-content">
-    <a href="home.html">← Kembali ke Dashboard</a>
-    <span id="breadcrumbTitle"> / Kontingen Detail</span>
-  </div>
-</div>
-
-<!-- MAIN CONTENT -->
-<div class="container">
-
-  <!-- HEADER INFO -->
-  <div class="kontingen-header">
-    <div>
-      <h2 id="kontigenName">Nama Kontingen</h2>
-      <p id="kontigenAddress" class="kontigen-address">Alamat</p>
-      <p class="kontigen-code">Kode: <code id="kontigenCode">ABC123</code></p>
-    </div>
-    <button class="btn-edit-kontingen" onclick="editKontigenInfo()">✎ Edit Info</button>
-  </div>
-
-  <!-- TABS NAVIGATION -->
-  <div class="tabs-container">
-    <div class="tabs">
-      <button class="tab-button active" onclick="switchTab('data-pelatih')">
-        👨‍🏫 Data Pelatih
-      </button>
-      <button class="tab-button" onclick="switchTab('data-atlet')">
-        👥 Data Atlet
-      </button>
-      <button class="tab-button" onclick="switchTab('program-latihan')">
-        📋 Program Latihan
-      </button>
-      <button class="tab-button" onclick="switchTab('absensi')">
-        📋 Absensi
-      </button>
-      <button class="tab-button" onclick="switchTab('jadwal')">
-        📅 Jadwal Pertandingan
-      </button>
+  <div class="breadcrumb">
+    <div class="breadcrumb-content">
+      <a href="/admin/home.html">← Kembali ke Dashboard</a>
+      <span id="breadcrumbTitle"> / Kontingen Detail</span>
     </div>
   </div>
 
-  <!-- TAB CONTENT -->
-  <div class="tabs-content">
+  <main class="container">
 
-    <!-- TAB 1: DATA PELATIH -->
-    <div id="data-pelatih" class="tab-content active">
-      <div class="section-header">
-        <h3>Data Pelatih</h3>
-        <button class="btn-primary" onclick="openAddPelatihModal()">+ Tambah Pelatih</button>
+    <section class="kontingen-header">
+      <div>
+        <h2 id="kontigenName">Nama Kontingen</h2>
+        <p id="kontigenAddress" class="kontigen-address">Alamat</p>
+        <p class="kontigen-code">
+          Kode: <code id="kontigenCode">ABC123</code>
+        </p>
       </div>
-      <div class="data-grid" id="pelatihGrid">
-        <div class="empty-state">Belum ada data pelatih</div>
-      </div>
-    </div>
+    </section>
 
-    <!-- TAB 2: DATA ATLET -->
-    <div id="data-atlet" class="tab-content">
-      <div class="section-header">
-        <h3>Data Atlet</h3>
-        <button class="btn-primary" onclick="openAddAtletModal()">+ Tambah Atlet</button>
-      </div>
-      <div class="data-grid" id="atletGrid">
-        <div class="empty-state">Belum ada data atlet</div>
-      </div>
-    </div>
+    <section class="tabs-container">
+      <div class="tabs">
+        <button class="tab-button active" onclick="switchTab('data-pelatih')">
+          👨‍🏫 Data Pelatih
+        </button>
 
-    <!-- TAB 3: PROGRAM LATIHAN -->
-    <div id="program-latihan" class="tab-content">
-      <div class="section-header">
-        <h3>Program Latihan</h3>
-        <div class="button-group-small">
-          <button class="btn-primary" onclick="openUploadProgramModal()">📤 Upload File</button>
-          <button class="btn-secondary" onclick="downloadProgram()">📥 Download</button>
+        <button class="tab-button" onclick="switchTab('data-atlet')">
+          👥 Data Atlet
+        </button>
+
+        <button class="tab-button" onclick="switchTab('program-latihan')">
+          📋 Program Latihan
+        </button>
+
+        <button class="tab-button" onclick="switchTab('absensi')">
+          📋 Absensi
+        </button>
+
+        <button class="tab-button" onclick="switchTab('jadwal')">
+          📅 Jadwal Pertandingan
+        </button>
+
+        <button class="tab-button" onclick="switchTab('laporan-bulanan')">
+          📊 Laporan Bulanan
+        </button>
+      </div>
+    </section>
+
+    <section class="tabs-content">
+
+      <div id="data-pelatih" class="tab-content active">
+        <div class="section-header">
+          <h3>Data Pelatih</h3>
+          <button class="btn-primary" onclick="openAddPelatihModal()">
+            + Tambah Pelatih
+          </button>
+        </div>
+
+        <div class="data-grid" id="pelatihGrid">
+          <div class="empty-state">Belum ada data pelatih</div>
         </div>
       </div>
 
-      <div class="program-list" id="programList">
-        <div class="empty-state">Belum ada file program latihan</div>
-      </div>
-    </div>
+      <div id="data-atlet" class="tab-content">
+        <div class="section-header">
+          <h3>Data Atlet</h3>
+          <button class="btn-primary" onclick="openAddAtletModal()">
+            + Tambah Atlet
+          </button>
+        </div>
 
-    <!-- TAB 4: ABSENSI -->
-    <div id="absensi" class="tab-content">
-      <div class="section-header">
-        <h3>Absensi</h3>
-        <div class="button-group-small">
-          <input type="date" id="absensiDate" class="date-input">
-          <button class="btn-primary" onclick="loadAbsensi()">Load</button>
+        <div class="data-grid" id="atletGrid">
+          <div class="empty-state">Belum ada data atlet</div>
         </div>
       </div>
 
-      <div class="absensi-container" id="absensiContainer">
-        <div class="empty-state">Pilih tanggal untuk melihat absensi</div>
-      </div>
+      <div id="program-latihan" class="tab-content">
+        <div class="section-header">
+          <h3>Program Latihan</h3>
 
-      <div class="absensi-legend">
-        <span class="legend-item"><span class="legend-color" style="background: #22c55e;"></span> Hadir</span>
-        <span class="legend-item"><span class="legend-color" style="background: #ef4444;"></span> Absen</span>
-        <span class="legend-item"><span class="legend-color" style="background: #eab308;"></span> Izin</span>
-      </div>
-    </div>
+          <div class="button-group-small">
+            <button class="btn-primary" onclick="openUploadProgramModal()">
+              📤 Upload File
+            </button>
 
-    <!-- TAB 5: JADWAL PERTANDINGAN -->
-    <div id="jadwal" class="tab-content">
-      <div class="section-header">
-        <h3>Jadwal Pertandingan</h3>
-        <button class="btn-primary" onclick="openAddJadwalModal()">+ Tambah Jadwal</button>
-      </div>
-
-      <div class="jadwal-list" id="jadwalList">
-        <div class="empty-state">Belum ada jadwal pertandingan</div>
-      </div>
-    </div>
-
-  </div>
-</div>
-
-<!-- MODAL: TAMBAH PELATIH -->
-<div id="addPelatihModal" class="modal">
-  <div class="modal-content">
-    <div class="modal-header">
-      <h3>Tambah Data Pelatih</h3>
-      <button class="close-btn" onclick="closeModal('addPelatihModal')">&times;</button>
-    </div>
-    <div class="modal-body">
-      <form id="addPelatihForm">
-        <div class="form-group">
-          <label>Foto Pelatih</label>
-          <input type="file" id="pelatihFoto" accept="image/*" required>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Nama Lengkap</label>
-            <input type="text" id="pelatihNama" required>
-          </div>
-          <div class="form-group">
-            <label>Usia</label>
-            <input type="number" id="pelatihUsia" min="1">
+            <button class="btn-secondary" onclick="downloadProgram()">
+              📥 Download
+            </button>
           </div>
         </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Tanggal Lahir</label>
-            <input type="date" id="pelatihTTL">
+
+        <div class="program-list" id="programList">
+          <div class="empty-state">Belum ada file program latihan</div>
+        </div>
+      </div>
+
+      <div id="absensi" class="tab-content">
+        <div class="section-header">
+          <h3>Absensi</h3>
+
+          <div class="button-group-small">
+            <input type="date" id="absensiDate" class="date-input">
+            <button class="btn-primary" onclick="loadAbsensi()">Load</button>
           </div>
         </div>
-        <div class="form-group">
-          <label>Riwayat Prestasi (Opsional)</label>
-          <textarea id="pelatihPrestasi" placeholder="Contoh: Juara Nasional 2020..."></textarea>
+
+        <div class="absensi-container" id="absensiContainer">
+          <div class="empty-state">Pilih tanggal untuk melihat absensi</div>
         </div>
-        <div class="button-group">
-          <button type="button" class="btn-secondary" onclick="closeModal('addPelatihModal')">Batal</button>
-          <button type="submit" class="btn-primary">Simpan</button>
+
+        <div class="absensi-legend">
+          <span class="legend-item">
+            <span class="legend-color" style="background: #22c55e;"></span>
+            Hadir
+          </span>
+
+          <span class="legend-item">
+            <span class="legend-color" style="background: #ef4444;"></span>
+            Absen
+          </span>
+
+          <span class="legend-item">
+            <span class="legend-color" style="background: #eab308;"></span>
+            Izin
+          </span>
         </div>
-      </form>
+      </div>
+
+      <div id="jadwal" class="tab-content">
+        <div class="section-header">
+          <h3>Jadwal Pertandingan</h3>
+          <button class="btn-primary" onclick="openAddJadwalModal()">
+            + Tambah Jadwal
+          </button>
+        </div>
+
+        <div class="jadwal-list" id="jadwalList">
+          <div class="empty-state">Belum ada jadwal pertandingan</div>
+        </div>
+      </div>
+
+      <div id="laporan-bulanan" class="tab-content">
+        <div class="section-header">
+          <h3>Laporan Bulanan</h3>
+
+          <div class="button-group-small">
+            <button class="btn-primary" onclick="openUploadLaporanModal()">
+              📤 Upload File
+            </button>
+
+            <button class="btn-secondary" onclick="downloadLaporanBulanan()">
+              📥 Download
+            </button>
+          </div>
+        </div>
+
+        <div class="program-list" id="laporanBulananList">
+          <div class="empty-state">Belum ada file laporan bulanan</div>
+        </div>
+      </div>
+
+    </section>
+  </main>
+
+  <div id="addPelatihModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Tambah Data Pelatih</h3>
+        <button class="close-btn" onclick="closeModal('addPelatihModal')">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <form id="addPelatihForm">
+          <div class="form-group">
+            <label for="pelatihFoto">Foto Pelatih</label>
+            <input type="file" id="pelatihFoto" accept="image/*" required>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="pelatihNama">Nama Lengkap</label>
+              <input type="text" id="pelatihNama" required>
+            </div>
+
+            <div class="form-group">
+              <label for="pelatihUsia">Usia</label>
+              <input type="number" id="pelatihUsia" min="1">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="pelatihTTL">Tanggal Lahir</label>
+              <input type="date" id="pelatihTTL">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="pelatihPrestasi">Riwayat Prestasi (Opsional)</label>
+            <textarea id="pelatihPrestasi" placeholder="Contoh: Juara Nasional 2020..."></textarea>
+          </div>
+
+          <div class="button-group">
+            <button type="button" class="btn-secondary" onclick="closeModal('addPelatihModal')">
+              Batal
+            </button>
+
+            <button type="submit" class="btn-primary">
+              Simpan
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   </div>
-</div>
 
-<!-- MODAL: TAMBAH ATLET -->
-<div id="addAtletModal" class="modal">
-  <div class="modal-content">
-    <div class="modal-header">
-      <h3>Tambah Data Atlet</h3>
-      <button class="close-btn" onclick="closeModal('addAtletModal')">&times;</button>
-    </div>
-    <div class="modal-body">
-      <form id="addAtletForm">
-        <div class="form-group">
-          <label>Foto Atlet</label>
-          <input type="file" id="atletFoto" accept="image/*" required>
-        </div>
-        <div class="form-row">
+  <div id="addAtletModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Tambah Data Atlet</h3>
+        <button class="close-btn" onclick="closeModal('addAtletModal')">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <form id="addAtletForm">
           <div class="form-group">
-            <label>Nama Lengkap</label>
-            <input type="text" id="atletNama" required>
+            <label for="atletFoto">Foto Atlet</label>
+            <input type="file" id="atletFoto" accept="image/*" required>
           </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="atletNama">Nama Lengkap</label>
+              <input type="text" id="atletNama" required>
+            </div>
+
+            <div class="form-group">
+              <label for="atletUsia">Usia</label>
+              <input type="number" id="atletUsia" min="1">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="atletTTL">Tanggal Lahir</label>
+              <input type="date" id="atletTTL">
+            </div>
+          </div>
+
           <div class="form-group">
-            <label>Usia</label>
-            <input type="number" id="atletUsia" min="1">
+            <label for="atletPrestasi">Riwayat Prestasi (Opsional)</label>
+            <textarea id="atletPrestasi" placeholder="Contoh: Juara Kota 2023..."></textarea>
           </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Tanggal Lahir</label>
-            <input type="date" id="atletTTL">
+
+          <div class="button-group">
+            <button type="button" class="btn-secondary" onclick="closeModal('addAtletModal')">
+              Batal
+            </button>
+
+            <button type="submit" class="btn-primary">
+              Simpan
+            </button>
           </div>
-        </div>
-        <div class="form-group">
-          <label>Riwayat Prestasi (Opsional)</label>
-          <textarea id="atletPrestasi" placeholder="Contoh: Juara Kota 2023..."></textarea>
-        </div>
-        <div class="button-group">
-          <button type="button" class="btn-secondary" onclick="closeModal('addAtletModal')">Batal</button>
-          <button type="submit" class="btn-primary">Simpan</button>
-        </div>
-      </form>
+        </form>
+      </div>
     </div>
   </div>
-</div>
 
-<!-- MODAL: UPLOAD PROGRAM -->
-<div id="uploadProgramModal" class="modal">
-  <div class="modal-content">
-    <div class="modal-header">
-      <h3>Upload File Program Latihan</h3>
-      <button class="close-btn" onclick="closeModal('uploadProgramModal')">&times;</button>
-    </div>
-    <div class="modal-body">
-      <form id="uploadProgramForm">
-        <div class="form-group">
-          <label>Pilih File (PDF, Excel, Spreadsheet)</label>
-          <input type="file" id="programFile" accept=".pdf,.xlsx,.xls,.csv" required>
-          <small>Format: PDF, Excel (.xlsx, .xls), atau CSV</small>
-        </div>
-        <div class="form-group">
-          <label>Nama Program</label>
-          <input type="text" id="programNama" placeholder="Contoh: Program Latihan Bulan Februari" required>
-        </div>
-        <div class="form-group">
-          <label>Deskripsi (Opsional)</label>
-          <textarea id="programDesc"></textarea>
-        </div>
-        <div class="button-group">
-          <button type="button" class="btn-secondary" onclick="closeModal('uploadProgramModal')">Batal</button>
-          <button type="submit" class="btn-primary">Upload</button>
-        </div>
-      </form>
+  <div id="uploadProgramModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Upload File Program Latihan</h3>
+        <button class="close-btn" onclick="closeModal('uploadProgramModal')">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <form id="uploadProgramForm">
+          <div class="form-group">
+            <label for="programFile">Pilih File (PDF, Excel, Spreadsheet)</label>
+            <input type="file" id="programFile" accept=".pdf,.xlsx,.xls,.csv" required>
+            <small>Format: PDF, Excel (.xlsx, .xls), atau CSV</small>
+          </div>
+
+          <div class="form-group">
+            <label for="programNama">Nama Program</label>
+            <input 
+              type="text" 
+              id="programNama" 
+              placeholder="Contoh: Program Latihan Bulan Februari" 
+              required
+            >
+          </div>
+
+          <div class="form-group">
+            <label for="programDesc">Deskripsi (Opsional)</label>
+            <textarea id="programDesc"></textarea>
+          </div>
+
+          <div class="button-group">
+            <button type="button" class="btn-secondary" onclick="closeModal('uploadProgramModal')">
+              Batal
+            </button>
+
+            <button type="submit" class="btn-primary">
+              Upload
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   </div>
-</div>
 
-<!-- MODAL: TAMBAH JADWAL -->
-<div id="addJadwalModal" class="modal">
-  <div class="modal-content">
-    <div class="modal-header">
-      <h3>Tambah Jadwal Pertandingan</h3>
-      <button class="close-btn" onclick="closeModal('addJadwalModal')">&times;</button>
-    </div>
-    <div class="modal-body">
-      <form id="addJadwalForm">
-        <div class="form-group">
-          <label>No. Pertandingan</label>
-          <input type="text" id="jadwalNo" placeholder="Contoh: P001" required>
-        </div>
-        <div class="form-group">
-          <label>Nama Pertandingan</label>
-          <input type="text" id="jadwalNama" placeholder="Contoh: Turnamen Bulutangkis" required>
-        </div>
-        <div class="form-row">
+  <div id="uploadLaporanModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Upload File Laporan Bulanan</h3>
+        <button class="close-btn" onclick="closeModal('uploadLaporanModal')">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <form id="uploadLaporanForm">
           <div class="form-group">
-            <label>Tanggal</label>
-            <input type="date" id="jadwalTanggal" required>
+            <label for="laporanFile">Pilih File Laporan</label>
+            <input type="file" id="laporanFile" accept=".pdf,.xlsx,.xls,.csv" required>
+            <small>Format: PDF, Excel (.xlsx, .xls), atau CSV</small>
           </div>
+
           <div class="form-group">
-            <label>Jam</label>
-            <input type="time" id="jadwalJam">
+            <label for="laporanNama">Nama Laporan</label>
+            <input 
+              type="text" 
+              id="laporanNama" 
+              placeholder="Contoh: Laporan Bulanan Januari" 
+              required
+            >
           </div>
-        </div>
-        <div class="form-group">
-          <label>Tempat</label>
-          <textarea id="jadwalTempat" placeholder="Alamat lengkap tempat pertandingan"></textarea>
-        </div>
-        <div class="button-group">
-          <button type="button" class="btn-secondary" onclick="closeModal('addJadwalModal')">Batal</button>
-          <button type="submit" class="btn-primary">Simpan</button>
-        </div>
-      </form>
+
+          <div class="form-group">
+            <label for="laporanDesc">Deskripsi (Opsional)</label>
+            <textarea id="laporanDesc"></textarea>
+          </div>
+
+          <div class="button-group">
+            <button type="button" class="btn-secondary" onclick="closeModal('uploadLaporanModal')">
+              Batal
+            </button>
+
+            <button type="submit" class="btn-primary">
+              Upload
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   </div>
-</div>
 
-<script src="/js/admin/kontingen-detail.js"></script>
+  <div id="addJadwalModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Tambah Jadwal Pertandingan</h3>
+        <button class="close-btn" onclick="closeModal('addJadwalModal')">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <form id="addJadwalForm">
+          <div class="form-group">
+            <label for="jadwalNo">No. Pertandingan</label>
+            <input type="text" id="jadwalNo" placeholder="Contoh: P001" required>
+          </div>
+
+          <div class="form-group">
+            <label for="jadwalNama">Nama Pertandingan</label>
+            <input type="text" id="jadwalNama" placeholder="Contoh: Turnamen Bulutangkis" required>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="jadwalTanggal">Tanggal</label>
+              <input type="date" id="jadwalTanggal" required>
+            </div>
+
+            <div class="form-group">
+              <label for="jadwalJam">Jam</label>
+              <input type="time" id="jadwalJam">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="jadwalTempat">Tempat</label>
+            <textarea 
+              id="jadwalTempat" 
+              placeholder="Alamat lengkap tempat pertandingan"
+            ></textarea>
+          </div>
+
+          <div class="button-group">
+            <button type="button" class="btn-secondary" onclick="closeModal('addJadwalModal')">
+              Batal
+            </button>
+
+            <button type="submit" class="btn-primary">
+              Simpan
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/custom-alert.js"></script>
+  <script src="/js/admin/kontingen-detail.js"></script>
 </body>
+
 </html>
