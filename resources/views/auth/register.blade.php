@@ -32,48 +32,68 @@
 
         <h3>Bergabunglah dengan Kami</h3>
 
-        <form id="registerForm">
+        <form id="registerForm" method="POST" action="{{ route('register.store') }}">
+          @csrf
+
           <div class="input-group">
             <label for="fullname">Nama Lengkap</label>
-            <input type="text" id="fullname" placeholder="Masukkan nama lengkap" required>
+            <input type="text" id="fullname" name="name" value="{{ old('name') }}" placeholder="Masukkan nama lengkap" required>
+            @error('name')
+              <p class="input-error">{{ $message }}</p>
+            @enderror
           </div>
 
           <div class="input-group">
             <label for="email">Email</label>
-            <input type="email" id="email" placeholder="Masukkan email" required>
+            <input type="email" id="email" name="email" value="{{ old('email') }}" placeholder="Masukkan email" required>
+            @error('email')
+              <p class="input-error">{{ $message }}</p>
+            @enderror
           </div>
 
           <div class="input-group">
             <label for="username">Username</label>
-            <input type="text" id="username" placeholder="Masukkan username" required>
+            <input type="text" id="username" name="username" value="{{ old('username') }}" placeholder="Masukkan username" required>
+            @error('username')
+              <p class="input-error">{{ $message }}</p>
+            @enderror
           </div>
 
           <div class="input-group">
             <label for="password">Password</label>
-            <input type="password" id="password" placeholder="Masukkan password" required>
+            <input type="password" id="password" name="password" placeholder="Masukkan password" required>
+            @error('password')
+              <p class="input-error">{{ $message }}</p>
+            @enderror
           </div>
 
           <div class="input-group">
-            <label for="confirmPassword">Konfirmasi Password</label>
-            <input type="password" id="confirmPassword" placeholder="Konfirmasi password" required>
+            <label for="password_confirmation">Konfirmasi Password</label>
+            <input type="password" id="password_confirmation" name="password_confirmation" placeholder="Konfirmasi password" required>
           </div>
 
           <div class="input-group">
             <label for="phone">No. Telepon (Opsional)</label>
-            <input type="tel" id="phone" placeholder="Masukkan no. telepon">
+            <input type="tel" id="phone" name="phone_number" value="{{ old('phone_number') }}" placeholder="Masukkan no. telepon">
+            @error('phone_number')
+              <p class="input-error">{{ $message }}</p>
+            @enderror
           </div>
 
           <div class="options">
             <label>
-              <input type="checkbox" id="agreeTerms" required>
+              <input type="checkbox" id="agreeTerms" name="terms" value="1" {{ old('terms') ? 'checked' : '' }} required>
               Saya setuju dengan <a href="#">Syarat & Ketentuan</a>
             </label>
+            @error('terms')
+              <p class="input-error">{{ $message }}</p>
+            @enderror
           </div>
 
           <button type="submit">Daftar</button>
 
           <p class="login">
-            Sudah punya akun? <a href="/auth/login.html">Login</a>
+            Sudah punya akun? <a href="{{ route('login') }}">Login</a>
           </p>
         </form>
       </div>

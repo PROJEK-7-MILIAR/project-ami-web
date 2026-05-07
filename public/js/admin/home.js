@@ -42,23 +42,25 @@ function askConfirm(message) {
 // =========================================================
 
 function checkAuth() {
-  const isLoggedIn = localStorage.getItem('isLoggedIn');
-  const userEmail = localStorage.getItem('userEmail');
-  const userUsername = localStorage.getItem('userUsername');
-
-  if (isLoggedIn !== 'true' || (!userEmail && !userUsername)) {
-    notify('Silakan login terlebih dahulu!', 'error', 1200)
-      .then(function () {
-        window.location.href = '/auth/login.html';
-      });
-
-    return false;
+  if (window.LaravelAuth && window.LaravelAuth.sync()) {
+    return true;
   }
 
-  return true;
+  notify('Silakan login terlebih dahulu!', 'error', 1200)
+    .then(function () {
+      window.location.href = '/login';
+    });
+
+  return false;
 }
 
 function getCurrentUserKey() {
+  const authUser = window.LaravelAuth ? window.LaravelAuth.getUser() : null;
+
+  if (authUser) {
+    return authUser.username || authUser.email || authUser.name || 'User';
+  }
+
   return (
     localStorage.getItem('userUsername') ||
     localStorage.getItem('userEmail') ||
@@ -68,6 +70,12 @@ function getCurrentUserKey() {
 }
 
 function getCurrentUserName() {
+  const authUser = window.LaravelAuth ? window.LaravelAuth.getUser() : null;
+
+  if (authUser) {
+    return authUser.name || authUser.username || authUser.email || 'User';
+  }
+
   return (
     localStorage.getItem('userName') ||
     localStorage.getItem('userEmail') ||
@@ -81,10 +89,11 @@ function getCurrentUserName() {
 // =========================================================
 
 function updateCurrentUserOnlineStatus() {
-  const username = localStorage.getItem('userUsername');
-  const email = localStorage.getItem('userEmail');
-  const name = localStorage.getItem('userName');
-  const role = localStorage.getItem('userRole') || 'admin';
+  const authUser = window.LaravelAuth ? window.LaravelAuth.getUser() : null;
+  const username = authUser ? authUser.username : localStorage.getItem('userUsername');
+  const email = authUser ? authUser.email : localStorage.getItem('userEmail');
+  const name = authUser ? authUser.name : localStorage.getItem('userName');
+  const role = authUser ? authUser.role : (localStorage.getItem('userRole') || 'admin');
 
   if (!username && !email) return;
 
@@ -106,6 +115,17 @@ function updateCurrentUserOnlineStatus() {
 }
 
 function IU_getCurrentOnlineIdentity() {
+  const authUser = window.LaravelAuth ? window.LaravelAuth.getUser() : null;
+
+  if (authUser) {
+    return {
+      username: authUser.username || '',
+      email: authUser.email || '',
+      name: authUser.name || '',
+      role: authUser.role || 'admin'
+    };
+  }
+
   return {
     username: localStorage.getItem('userUsername') || '',
     email: localStorage.getItem('userEmail') || '',
@@ -745,7 +765,7 @@ function enterKontingen(id) {
 
   localStorage.setItem('currentKontigen', JSON.stringify(kontigen));
 
-  window.location.href = '/admin/kontingen-detail.html';
+  window.location.href = '/admin/kontingen-detail';
 }
 
 // =========================================================
@@ -766,10 +786,12 @@ function logout() {
       localStorage.removeItem('userName');
       localStorage.removeItem('currentKontigen');
 
-      notify('Anda berhasil logout.', 'success', 800)
-        .then(function () {
-          window.location.href = '/auth/login.html';
-        });
+      if (window.LaravelAuth) {
+        window.LaravelAuth.logout();
+        return;
+      }
+
+      window.location.href = '/login';
     });
 }
 

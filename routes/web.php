@@ -1,26 +1,57 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\RegisterController;
 
 Route::get('/', function () {
-    return view('welcome');
+    return view('index');
 });
 
-// Authentication Routes
-Route::get('/login', function () {
-    return view('auth.login');
-})->name('login');
 
-Route::get('/register', function () {
-    return view('auth.register');
-})->name('register');
+// Guest Routes
+Route::middleware('guest')->group(function () {
 
-// Superadmin Routes
-Route::get('/superadmin/dashboard', function () {
-    return view('superadmin.admin-dashboard');
-})->name('superadmin.dashboard');
+    Route::get('/login', [LoginController::class, 'index'])
+        ->name('login');
 
-// Admin Routes
-Route::get('/admin/dashboard', function () {
-    return view('admin.home');
-})->name('admin.dashboard');
+    Route::get('/register', [RegisterController::class, 'index'])
+        ->name('register');
+
+    Route::post('/register', [RegisterController::class, 'store'])
+        ->name('register.store');
+
+    Route::post('/login', [LoginController::class, 'authenticate'])
+        ->name('login.authenticate');
+});
+
+// Authenticated Routes
+Route::middleware('auth')->group(function () {
+
+    Route::post('/logout', [LoginController::class, 'logout'])
+        ->name('logout');
+
+    // Superadmin Routes
+    Route::middleware('role:superadmin')->group(function () {
+
+        Route::get('/superadmin/dashboard', function () {
+            return view('superadmin.admin-dashboard');
+        })->name('superadmin.dashboard');
+    });
+
+    // Admin Routes
+    Route::middleware('role:admin,superadmin')->group(function () {
+
+        Route::get('/admin/dashboard', function () {
+            return view('admin.home');
+        })->name('admin.dashboard');
+
+        Route::get('/admin/kontingen-detail', function () {
+            return view('admin.kontingen-detail');
+        })->name('admin.kontingen-detail');
+
+        Route::get('/admin/kontingen-detail.html', function () {
+            return redirect()->route('admin.kontingen-detail');
+        });
+    });
+});

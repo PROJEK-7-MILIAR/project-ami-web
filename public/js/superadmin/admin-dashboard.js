@@ -32,24 +32,21 @@ function askConfirm(message) {
 // =========================================================
 
 function checkSuperAdminAuth() {
-  const isLoggedIn = localStorage.getItem('isLoggedIn');
-  const userRole = localStorage.getItem('userRole');
-  const userEmail = localStorage.getItem('userEmail');
-  const userUsername = localStorage.getItem('userUsername');
-
-  if (isLoggedIn !== 'true' || (!userEmail && !userUsername)) {
+  if (!window.LaravelAuth || !window.LaravelAuth.sync()) {
     notify('Silakan login terlebih dahulu.', 'error', 1200)
       .then(function () {
-        window.location.href = '/auth/login.html';
+        window.location.href = '/login';
       });
 
     return false;
   }
 
-  if (userRole !== 'superadmin' && userUsername !== 'superadmin') {
+  const authUser = window.LaravelAuth.getUser();
+
+  if (!authUser || authUser.role !== 'superadmin') {
     notify('Akses ditolak! Halaman ini hanya untuk Super Admin.', 'error', 1400)
       .then(function () {
-        window.location.href = '/admin/home.html';
+        window.location.href = '/admin/dashboard';
       });
 
     return false;
@@ -88,8 +85,9 @@ function loadUserInfo() {
 
   if (!userInfo) return;
 
-  const userEmail = localStorage.getItem('userEmail') || 'superadmin@atlet.local';
-  const userName = localStorage.getItem('userName') || 'Super Admin';
+  const authUser = window.LaravelAuth ? window.LaravelAuth.getUser() : null;
+  const userEmail = authUser ? authUser.email : (localStorage.getItem('userEmail') || 'superadmin@atlet.local');
+  const userName = authUser ? authUser.name : (localStorage.getItem('userName') || 'Super Admin');
 
   userInfo.textContent = `${userName} (${userEmail})`;
 }
@@ -1057,10 +1055,12 @@ function logout() {
       localStorage.removeItem('userName');
       localStorage.removeItem('currentKontigen');
 
-      notify('Anda berhasil logout.', 'success', 900)
-        .then(function () {
-          window.location.href = '/auth/login.html';
-        });
+      if (window.LaravelAuth) {
+        window.LaravelAuth.logout();
+        return;
+      }
+
+      window.location.href = '/login';
     });
 }
 

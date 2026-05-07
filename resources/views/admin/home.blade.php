@@ -1,5 +1,14 @@
 <!DOCTYPE html>
 <html lang="id">
+@php
+  $authUser = auth()->user();
+  $authUserPayload = [
+    'name' => $authUser->name,
+    'email' => $authUser->email,
+    'username' => $authUser->username,
+    'role' => $authUser->role,
+  ];
+@endphp
 
 <head>
   <meta charset="UTF-8">
@@ -20,7 +29,7 @@
       </div>
 
       <div class="header-actions">
-        <span class="user-info" id="userInfo">User</span>
+        <span class="user-info" id="userInfo">{{ $authUser->name }}</span>
         <button class="logout-btn" onclick="logout()">Logout</button>
       </div>
     </div>
@@ -124,6 +133,15 @@
   </div>
 
   <script src="/js/custom-alert.js"></script>
+  <form id="logoutForm" method="POST" action="{{ route('logout') }}" hidden>
+    @csrf
+  </form>
+  <script>
+    window.authUser = @json($authUserPayload);
+    window.logoutUrl = @json(route('logout'));
+    window.csrfToken = @json(csrf_token());
+  </script>
+  <script src="/js/auth/session.js"></script>
   <script src="/js/admin/home.js"></script>
 </body>
 

@@ -1,5 +1,14 @@
 <!DOCTYPE html>
 <html lang="id">
+@php
+  $authUser = auth()->user();
+  $authUserPayload = [
+    'name' => $authUser->name,
+    'email' => $authUser->email,
+    'username' => $authUser->username,
+    'role' => $authUser->role,
+  ];
+@endphp
 
 <head>
   <meta charset="UTF-8">
@@ -19,7 +28,7 @@
       </div>
 
       <div class="header-actions">
-        <span class="user-info" id="userInfo">Admin User</span>
+        <span class="user-info" id="userInfo">{{ $authUser->name }}</span>
         <button class="logout-btn" onclick="logout()">Logout</button>
       </div>
     </div>
@@ -27,7 +36,7 @@
 
   <div class="breadcrumb">
     <div class="breadcrumb-content">
-      <a href="/admin/home.html">← Kembali ke Dashboard</a>
+      <a href="{{ route('admin.dashboard') }}">← Kembali ke Dashboard</a>
       <span id="breadcrumbTitle"> / Kontingen Detail</span>
     </div>
   </div>
@@ -309,10 +318,10 @@
 
           <div class="form-group">
             <label for="programNama">Nama Program</label>
-            <input 
-              type="text" 
-              id="programNama" 
-              placeholder="Contoh: Program Latihan Bulan Februari" 
+            <input
+              type="text"
+              id="programNama"
+              placeholder="Contoh: Program Latihan Bulan Februari"
               required
             >
           </div>
@@ -353,10 +362,10 @@
 
           <div class="form-group">
             <label for="laporanNama">Nama Laporan</label>
-            <input 
-              type="text" 
-              id="laporanNama" 
-              placeholder="Contoh: Laporan Bulanan Januari" 
+            <input
+              type="text"
+              id="laporanNama"
+              placeholder="Contoh: Laporan Bulanan Januari"
               required
             >
           </div>
@@ -413,8 +422,8 @@
 
           <div class="form-group">
             <label for="jadwalTempat">Tempat</label>
-            <textarea 
-              id="jadwalTempat" 
+            <textarea
+              id="jadwalTempat"
               placeholder="Alamat lengkap tempat pertandingan"
             ></textarea>
           </div>
@@ -434,6 +443,15 @@
   </div>
 
   <script src="/js/custom-alert.js"></script>
+  <form id="logoutForm" method="POST" action="{{ route('logout') }}" hidden>
+    @csrf
+  </form>
+  <script>
+    window.authUser = @json($authUserPayload);
+    window.logoutUrl = @json(route('logout'));
+    window.csrfToken = @json(csrf_token());
+  </script>
+  <script src="/js/auth/session.js"></script>
   <script src="/js/admin/kontingen-detail.js"></script>
 </body>
 

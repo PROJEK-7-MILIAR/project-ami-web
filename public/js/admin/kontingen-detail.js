@@ -32,6 +32,12 @@ function askConfirm(message) {
 // =========================================================
 
 function getCurrentUserKey() {
+  const authUser = window.LaravelAuth ? window.LaravelAuth.getUser() : null;
+
+  if (authUser) {
+    return authUser.username || authUser.email || authUser.name || 'User';
+  }
+
   return (
     localStorage.getItem('userUsername') ||
     localStorage.getItem('userEmail') ||
@@ -41,6 +47,12 @@ function getCurrentUserKey() {
 }
 
 function getCurrentUserName() {
+  const authUser = window.LaravelAuth ? window.LaravelAuth.getUser() : null;
+
+  if (authUser) {
+    return authUser.name || authUser.username || authUser.email || 'User';
+  }
+
   return (
     localStorage.getItem('userName') ||
     localStorage.getItem('userUsername') ||
@@ -58,6 +70,17 @@ function isDataOwner(data) {
 // =========================================================
 
 function IU_getCurrentOnlineIdentity() {
+  const authUser = window.LaravelAuth ? window.LaravelAuth.getUser() : null;
+
+  if (authUser) {
+    return {
+      username: authUser.username || '',
+      email: authUser.email || '',
+      name: authUser.name || '',
+      role: authUser.role || 'admin'
+    };
+  }
+
   return {
     username: localStorage.getItem('userUsername') || '',
     email: localStorage.getItem('userEmail') || '',
@@ -119,20 +142,16 @@ function updateCurrentUserOnlineStatus() {
 // =========================================================
 
 function checkAuth() {
-  const isLoggedIn = localStorage.getItem('isLoggedIn');
-  const userEmail = localStorage.getItem('userEmail');
-  const userUsername = localStorage.getItem('userUsername');
-
-  if (isLoggedIn !== 'true' || (!userEmail && !userUsername)) {
-    notify('Silakan login terlebih dahulu!', 'error', 1200)
-      .then(function () {
-        window.location.href = '/auth/login.html';
-      });
-
-    return false;
+  if (window.LaravelAuth && window.LaravelAuth.sync()) {
+    return true;
   }
 
-  return true;
+  notify('Silakan login terlebih dahulu!', 'error', 1200)
+    .then(function () {
+      window.location.href = '/login';
+    });
+
+  return false;
 }
 
 function checkKontingenAccess(kontigen) {
@@ -236,7 +255,7 @@ function loadKontigenData() {
   if (!selected) {
     notify('Kontingen tidak ditemukan, kembali ke dashboard.', 'error', 1200)
       .then(function () {
-        window.location.href = '/admin/home.html';
+        window.location.href = '/admin/dashboard';
       });
 
     return;
@@ -251,7 +270,7 @@ function loadKontigenData() {
 
     notify('Data kontingen tidak valid.', 'error', 1200)
       .then(function () {
-        window.location.href = '/admin/home.html';
+        window.location.href = '/admin/dashboard';
       });
 
     return;
@@ -271,7 +290,7 @@ function loadKontigenData() {
 
     notify('Data kontingen tidak ditemukan.', 'error', 1200)
       .then(function () {
-        window.location.href = '/admin/home.html';
+        window.location.href = '/admin/dashboard';
       });
 
     return;
@@ -282,7 +301,7 @@ function loadKontigenData() {
 
     notify('Anda tidak memiliki akses ke kontingen ini.', 'error', 1200)
       .then(function () {
-        window.location.href = '/admin/home.html';
+        window.location.href = '/admin/dashboard';
       });
 
     return;
@@ -1416,10 +1435,12 @@ function logout() {
       localStorage.removeItem('userName');
       localStorage.removeItem('currentKontigen');
 
-      notify('Anda berhasil logout.', 'success', 800)
-        .then(function () {
-          window.location.href = '/auth/login.html';
-        });
+      if (window.LaravelAuth) {
+        window.LaravelAuth.logout();
+        return;
+      }
+
+      window.location.href = '/login';
     });
 }
 

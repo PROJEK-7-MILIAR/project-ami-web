@@ -32,20 +32,28 @@
 
         <h3>Selamat Datang!</h3>
 
-        <form id="loginForm">
+        <form id="loginForm" method="POST" action="{{ route('login.authenticate') }}">
+          @csrf
+
           <div class="input-group">
             <label for="username">Username</label>
-            <input type="text" id="username" placeholder="Masukkan username" required>
+            <input type="text" id="username" name="username" value="{{ old('username') }}" placeholder="Masukkan username" required>
+            @error('username')
+              <p class="input-error">{{ $message }}</p>
+            @enderror
           </div>
 
           <div class="input-group">
             <label for="password">Password</label>
-            <input type="password" id="password" placeholder="Masukkan password" required>
+            <input type="password" id="password" name="password" placeholder="Masukkan password" required>
+            @error('password')
+              <p class="input-error">{{ $message }}</p>
+            @enderror
           </div>
 
           <div class="options">
             <label>
-              <input type="checkbox">
+              <input type="checkbox" name="remember" value="1">
               Remember me
             </label>
           </div>
@@ -53,7 +61,7 @@
           <button type="submit">Login</button>
 
           <p class="signup">
-            Belum punya akun? <a href="/auth/register.html">Daftar</a>
+            Belum punya akun? <a href="{{ route('register') }}">Daftar</a>
           </p>
 
           <hr style="margin: 20px 0; border: none; border-top: 1px solid #ccc;">
