@@ -150,6 +150,17 @@ body {
   transition: all 0.22s ease;
 }
 
+.sidebar .nav-menu .nav-item {
+  text-decoration: none;
+}
+
+.sidebar .nav-menu .nav-item:hover,
+.sidebar .nav-menu .nav-item:focus,
+.sidebar .nav-menu .nav-item:active {
+  text-decoration: none;
+}
+
+
 .nav-item:hover {
   background: rgba(255, 255, 255, 0.10);
   color: #ffffff;
