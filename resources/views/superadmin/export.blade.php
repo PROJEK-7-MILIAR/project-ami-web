@@ -6,7 +6,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Export Data - Super Admin ATLET</title>
 
-  <link rel="stylesheet" href="/css/superadmin/admin-styles.css">
+  <link rel="stylesheet" href="/css/superadmin/export.css">
+  <link rel="stylesheet" href="/css/superadmin/common.css">
   <link rel="stylesheet" href="/css/alert-style.css">
 </head>
 
@@ -21,7 +22,7 @@
 
       <div class="header-actions">
         <span class="user-info" id="userInfo">Super Admin</span>
-        <button class="logout-btn" onclick="logout()">Logout</button>
+        <button class="logout-btn" id="logoutBtn">Logout</button>
       </div>
     </div>
   </header>
@@ -93,7 +94,8 @@
   </main>
 
   <script src="/js/custom-alert.js"></script>
-  <script src="/js/superadmin/admin-dashboard.js"></script>
+  <script src="/js/superadmin/common.js"></script>
+  <script src="/js/superadmin/export.js"></script>
 </body>
 
 </html>
