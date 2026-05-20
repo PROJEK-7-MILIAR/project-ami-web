@@ -3,11 +3,18 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\Superadmin\AdminManagemetController;
 
 Route::get('/', function () {
     return view('index');
 });
 
+// Testing: Get CSRF Token
+    Route::get('/csrf-token', function () {
+        return response()->json([
+            'csrf_token' => csrf_token()
+        ]);
+    });
 
 // Guest Routes
 Route::middleware('guest')->group(function () {
@@ -55,3 +62,6 @@ Route::middleware('auth')->group(function () {
         });
     });
 });
+
+// Testing: API Routes for Admin Management
+Route::resource('admins', AdminManagemetController::class);
