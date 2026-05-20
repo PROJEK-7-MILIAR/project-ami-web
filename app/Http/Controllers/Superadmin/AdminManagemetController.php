@@ -9,12 +9,9 @@ use App\Models\User;
 class AdminManagemetController extends Controller
 {
     public function index(){
-        // $admins = User::where('role', 'admin')->get();
+        $admins = User::where('role', 'admin')->get();
 
-        // return view('admin.home', compact('admins'));
-        return response()->json([
-        'message' => 'Admin berhasil konek',
-        ], 201);
+        return view('superadmin.admin', compact('admins'));
     }
 
     public function store(Request $request){
@@ -22,7 +19,7 @@ class AdminManagemetController extends Controller
             'name'=> 'required|string|max:255',
             'email'=> 'required|string|email|max:255|unique:users',
             'username'=> 'required|string|max:255|unique:users',
-            'password'=> 'required|string|min:8|confirmed',
+            'password'=> 'required|string|min:6|confirmed',
         ]);
 
         $user = User::create([
@@ -30,9 +27,7 @@ class AdminManagemetController extends Controller
             'email'=> $request->email,
             'username'=> $request->username,
             'password'=> bcrypt($request->password),
-            'role'=> $request->role,
         ]);
-        // return back()->with('success', 'Admin berhasil ditambahkan');
         return response()->json([
         'message' => 'Admin berhasil ditambahkan',
         'data' => $user

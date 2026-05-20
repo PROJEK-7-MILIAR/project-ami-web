@@ -42,7 +42,7 @@
     <nav class="nav-menu">
       <a class="nav-item active" href="dashboard.html">📊 Dashboard</a>
       <a class="nav-item" href="kontingen.html">🏢 Manajemen Kontingen</a>
-      <a class="nav-item" href="admin.html">👥 Manajemen Admin</a>
+      <a class="nav-item" href="{{ route('superadmin.admins.list') }}">👥 Manajemen Admin</a>
       <a class="nav-item" href="monitoring.html">🔍 Monitoring Data</a>
       <a class="nav-item" href="activity-log.html">📝 Activity Log</a>
       <a class="nav-item" href="export.html">📥 Export Data</a>

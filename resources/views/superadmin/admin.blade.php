@@ -4,10 +4,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="csrf-token" content="{{ csrf_token() }}">
   <title>Manajemen Admin - Super Admin ATLET</title>
 
   <link rel="stylesheet" href="/css/superadmin/admin.css">
-  <link rel="stylesheet" href="/css/superadmin/common.css">
   <link rel="stylesheet" href="/css/alert-style.css">
 </head>
 
@@ -22,7 +22,7 @@
 
       <div class="header-actions">
         <span class="user-info" id="userInfo">Super Admin</span>
-        <button class="logout-btn" id="logoutBtn">Logout</button>
+        <button class="logout-btn" onclick="logout()">Logout</button>
       </div>
     </div>
   </header>
@@ -61,9 +61,28 @@
         </thead>
 
         <tbody id="adminList">
-          <tr>
-            <td colspan="5" class="empty-state">Loading...</td>
-          </tr>
+            @forelse ($admins as $admin)
+                <tr>
+                    <td>{{ $admin->username }}</td>
+                    <td>{{ $admin->name }}</td>
+                    <td>
+                        <span class="status-badge online">
+                            Aktif
+                        </span>
+                    </td>
+                    <td>-</td>
+                    <td>
+                        <button>Edit</button>
+                        <button>Delete</button>
+                    </td>
+                </tr>
+            @empty
+                <tr>
+                    <td colspan="5" class="empty-state">
+                        Belum ada admin
+                    </td>
+                </tr>
+            @endforelse
         </tbody>
       </table>
     </section>
@@ -73,7 +92,7 @@
     <div class="modal-content">
       <div class="modal-header">
         <h3>Tambah Admin Baru</h3>
-        <button type="button" class="close-btn" onclick="closeModal('addAdminModal')">&times;</button>
+        <button type="button" class="close-btn" onclick="closeAddAdminModal()">&times;</button>
       </div>
 
       <div class="modal-body">
@@ -81,6 +100,11 @@
           <div class="form-group">
             <label for="newUsername">Username</label>
             <input type="text" id="newUsername" placeholder="Masukkan username admin" required>
+          </div>
+
+          <div class="form-group">
+            <label for="newEmail">Email</label>
+            <input type="email" id="newEmail" placeholder="Masukkan email admin" required>
           </div>
 
           <div class="form-group">
@@ -94,7 +118,7 @@
           </div>
 
           <div class="button-group">
-            <button type="button" class="btn-secondary" onclick="closeModal('addAdminModal')">
+            <button type="button" class="btn-secondary" onclick="closeAddAdminModal()">
               Batal
             </button>
 
@@ -107,9 +131,8 @@
     </div>
   </div>
 
-  <script src="/js/custom-alert.js"></script>
-  <script src="/js/superadmin/admin.js"></script>
-  <script src="/js/superadmin/common.js"></script>
+  <script src="{{ asset('js/custom-alert.js') }}"></script>
+  <script src="{{ asset('js/superadmin/admin.js') }}"></script>
 </body>
 
 </html>

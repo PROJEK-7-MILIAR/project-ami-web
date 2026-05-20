@@ -42,9 +42,19 @@ Route::middleware('auth')->group(function () {
     Route::middleware('role:superadmin')->group(function () {
 
         Route::get('/superadmin/dashboard', function () {
-            return view('superadmin.admin-dashboard');
+            return view('superadmin.dashboard');
         })->name('superadmin.dashboard');
-    });
+
+        // CRUD Admin
+        Route::get('/superadmin/admins-list', [AdminManagemetController::class, 'index'])
+            ->name('superadmin.admins.list');
+        Route::post('/superadmin/admins-store', [AdminManagemetController::class, 'store'])
+            ->name('superadmin.admins.store');
+        Route::put('/superadmin/admins-update/{admin}', [AdminManagemetController::class, 'update'])
+            ->name('superadmin.admins.update');
+        Route::delete('/superadmin/admins-delete/{admin}', [AdminManagemetController::class, 'destroy'])
+            ->name('superadmin.admins.destroy');
+        });
 
     // Admin Routes
     Route::middleware('role:admin,superadmin')->group(function () {
@@ -52,16 +62,11 @@ Route::middleware('auth')->group(function () {
         Route::get('/admin/dashboard', function () {
             return view('admin.home');
         })->name('admin.dashboard');
-
         Route::get('/admin/kontingen-detail', function () {
             return view('admin.kontingen-detail');
         })->name('admin.kontingen-detail');
-
         Route::get('/admin/kontingen-detail.html', function () {
             return redirect()->route('admin.kontingen-detail');
         });
     });
 });
-
-// Testing: API Routes for Admin Management
-Route::resource('admins', AdminManagemetController::class);
