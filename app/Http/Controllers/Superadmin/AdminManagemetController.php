@@ -19,7 +19,7 @@ class AdminManagemetController extends Controller
             'name'=> 'required|string|max:255',
             'email'=> 'required|string|email|max:255|unique:users',
             'username'=> 'required|string|max:255|unique:users',
-            'password'=> 'required|string|min:6|confirmed',
+            'password'=> 'required|string|min:6',
         ]);
 
         $user = User::create([
@@ -27,6 +27,7 @@ class AdminManagemetController extends Controller
             'email'=> $request->email,
             'username'=> $request->username,
             'password'=> bcrypt($request->password),
+            'role' => 'admin',
         ]);
         return response()->json([
         'message' => 'Admin berhasil ditambahkan',
@@ -39,17 +40,28 @@ class AdminManagemetController extends Controller
             abort(404, 'Pengguna tidak ditemukan');
         }
 
-        $admin->update([
+        $request->validate([
+            'name'=> 'required|string|max:255',
+            'email'=> 'required|string|email|max:255|unique:users,email,' . $admin->id,
+            'username'=> 'required|string|max:255|unique:users,username,' . $admin->id,
+            'password'=> 'nullable|string|min:6',
+        ]);
+
+        $dataUpdate = [
             'name' => $request->name,
             'email' => $request->email,
             'username' => $request->username,
-            'password' => bcrypt($request->password),
-        ]);
-        // return back()->with('success', 'Admin berhasil diperbarui');
+        ];
+
+        if ($request->filled('password')) {
+            $dataUpdate['password'] = bcrypt($request->password);
+        }
+
+        $admin->update($dataUpdate);
+
         return response()->json([
             'message'=> 'Admin berhasil diperbarui'
         ]);
-
     }
 
     public function destroy(User $admin){

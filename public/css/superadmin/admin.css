@@ -379,7 +379,8 @@ select {
 
 .btn-primary,
 .btn-secondary,
-.btn-danger {
+.btn-danger,
+.btn-warning {
   border: none;
   cursor: pointer;
   transition: all 0.22s ease;
@@ -421,6 +422,17 @@ select {
 .btn-danger:hover {
   transform: translateY(-2px);
   box-shadow: 0 14px 28px rgba(239, 68, 68, 0.28);
+}
+
+.btn-warning {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: #ffffff;
+  box-shadow: 0 10px 22px rgba(245, 158, 11, 0.18);
+}
+
+.btn-warning:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 28px rgba(245, 158, 11, 0.28);
 }
 
 /* =========================================================
@@ -530,6 +542,12 @@ select {
 .status-badge.offline {
   background: #fee2e2;
   color: #991b1b;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 8px;
+  align-items: center;
 }
 
 /* =========================================================
@@ -1050,7 +1068,8 @@ select {
 
   .btn-primary,
   .btn-secondary,
-  .btn-danger {
+  .btn-danger,
+  .btn-warning {
     min-height: 39px;
     padding: 9px 12px;
     border-radius: 12px;

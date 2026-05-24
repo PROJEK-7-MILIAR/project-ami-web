@@ -44,7 +44,7 @@
       <div class="page-header">
         <h2>👥 Manajemen Admin (Pelatih)</h2>
 
-        <button type="button" class="btn-primary" id="openAddAdminBtn" onclick="openAddAdminModal()">
+        <button type="button" class="btn-primary" id="openAddAdminBtn">
           + Tambah Admin
         </button>
       </div>
@@ -71,9 +71,9 @@
                         </span>
                     </td>
                     <td>-</td>
-                    <td>
-                        <button>Edit</button>
-                        <button>Delete</button>
+                    <td class="action-buttons">
+                        <button class="btn-warning" onclick="openEditAdminModal({{ json_encode($admin) }})">Edit</button>
+                        <button class="btn-danger" onclick="deleteAdmin({{ $admin->id }})">Delete</button>
                     </td>
                 </tr>
             @empty
@@ -124,6 +124,51 @@
 
             <button type="submit" class="btn-primary">
               Simpan Admin
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div id="editAdminModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Edit Admin</h3>
+        <button type="button" class="close-btn" onclick="closeEditAdminModal()">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <form id="editAdminForm">
+          <input type="hidden" id="editId">
+
+          <div class="form-group">
+            <label for="editUsername">Username</label>
+            <input type="text" id="editUsername" placeholder="Masukkan username admin" required>
+          </div>
+
+          <div class="form-group">
+            <label for="editEmail">Email</label>
+            <input type="email" id="editEmail" placeholder="Masukkan email admin" required>
+          </div>
+
+          <div class="form-group">
+            <label for="editPassword">Password (Opsional)</label>
+            <input type="password" id="editPassword" placeholder="Kosongkan jika tidak ingin mengubah password">
+          </div>
+
+          <div class="form-group">
+            <label for="editName">Nama Lengkap</label>
+            <input type="text" id="editName" placeholder="Masukkan nama lengkap admin" required>
+          </div>
+
+          <div class="button-group">
+            <button type="button" class="btn-secondary" onclick="closeEditAdminModal()">
+              Batal
+            </button>
+
+            <button type="submit" class="btn-primary">
+              Simpan Perubahan
             </button>
           </div>
         </form>
