@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Superadmin\AdminManagemetController;
+use App\Http\Controllers\Admin\KontingenController;
 
 Route::get('/', function () {
     return view('index');
@@ -87,11 +88,10 @@ Route::middleware('auth')->group(function () {
         Route::get('/admin/dashboard', function () {
             return view('admin.home');
         })->name('admin.dashboard');
-        Route::get('/admin/kontingen-detail', function () {
-            return view('admin.kontingen-detail');
-        })->name('admin.kontingen-detail');
-        Route::get('/admin/kontingen-detail.html', function () {
-            return redirect()->route('admin.kontingen-detail');
+
+        Route::get('/admin/kontingen-list', [KontingenController::class, 'index']);
+        Route::post('/admin/kontingen', [KontingenController::class, 'store']);
+        Route::put('/admin/kontingen/{kontingen}', [KontingenController::class, 'update']);
+        Route::delete('/admin/kontingen/{kontingen}', [KontingenController::class, 'destroy']);
         });
-    });
 });

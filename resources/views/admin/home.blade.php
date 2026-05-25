@@ -13,6 +13,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+
   <title>Sistem Kontingen - ATLET</title>
 
   <link rel="stylesheet" href="/css/admin/home-styles.css">
@@ -43,7 +46,7 @@
         <h2>Buat Kontingen Baru</h2>
         <p>Buat kontingen baru dan dapatkan kode unik untuk dibagikan</p>
 
-        <button class="btn-large btn-create" onclick="openCreateModal()">
+        <button class="btn-large btn-create" onclick="KontingenAPI.openModal('createModal')">
           ➕ Buat Kontingen
         </button>
       </section>
@@ -54,15 +57,15 @@
         <p>Masukkan kode kontingen untuk mengakses</p>
 
         <div class="join-form">
-          <input 
-            type="text" 
-            id="joinCode" 
-            placeholder="Masukkan kode kontingen (contoh: ABC123)" 
+          <input
+            type="text"
+            id="joinCode"
+            placeholder="Masukkan kode kontingen (contoh: ABC123)"
             maxlength="8"
             class="input-code"
           >
 
-          <button class="btn-primary" onclick="joinKontingen()">
+          <button class="btn-primary" onclick="KontingenAPI.join()">
             Masuk
           </button>
         </div>
@@ -75,7 +78,7 @@
         </div>
 
         <div class="kontingen-grid" id="kontigenGrid">
-          <div class="empty-state">Belum ada kontingen</div>
+          <div class="empty-state">Memuat data...</div>
         </div>
       </section>
 
@@ -86,40 +89,40 @@
     <div class="modal-content">
       <div class="modal-header">
         <h3>Buat Kontingen Baru</h3>
-        <button class="close-btn" onclick="closeModal('createModal')">&times;</button>
+        <button class="close-btn" onclick="KontingenAPI.closeModal('createModal')">&times;</button>
       </div>
 
       <div class="modal-body">
         <form id="createForm">
           <div class="form-group">
             <label for="kontigenName">Nama Kontingen</label>
-            <input 
-              type="text" 
-              id="kontigenName" 
-              placeholder="Contoh: Pelatihan Bulutangkis" 
+            <input
+              type="text"
+              id="kontigenName"
+              placeholder="Contoh: Pelatihan Bulutangkis"
               required
             >
           </div>
 
           <div class="form-group">
             <label for="kontigenDesc">Deskripsi (Opsional)</label>
-            <textarea 
-              id="kontigenDesc" 
+            <textarea
+              id="kontigenDesc"
               placeholder="Deskripsi kontingen..."
             ></textarea>
           </div>
 
           <div class="form-group">
             <label for="kontigenAddress">Alamat Kontingen</label>
-            <input 
-              type="text" 
-              id="kontigenAddress" 
+            <input
+              type="text"
+              id="kontigenAddress"
               placeholder="Masukkan alamat kontingen"
             >
           </div>
 
           <div class="button-group">
-            <button type="button" class="btn-secondary" onclick="closeModal('createModal')">
+            <button type="button" class="btn-secondary" onclick="KontingenAPI.closeModal('createModal')">
               Batal
             </button>
 
@@ -133,14 +136,11 @@
   </div>
 
   <script src="/js/custom-alert.js"></script>
-  <form id="logoutForm" method="POST" action="{{ route('logout') }}" hidden>
-    @csrf
-  </form>
+
   <script>
     window.authUser = @json($authUserPayload);
-    window.logoutUrl = @json(route('logout'));
-    window.csrfToken = @json(csrf_token());
   </script>
+
   <script src="/js/auth/session.js"></script>
   <script src="/js/admin/home.js"></script>
 </body>
