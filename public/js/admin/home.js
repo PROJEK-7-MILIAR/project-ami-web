@@ -283,10 +283,8 @@ window.logout = async function() {
     if (!await askConfirm('Yakin ingin logout?')) return;
 
     try {
-        // Ambil CSRF Token
         const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
 
-        // 2. Tembak endpoint logout backend Laravel
         const response = await fetch('/logout', {
             method: 'POST',
             headers: {
@@ -297,19 +295,16 @@ window.logout = async function() {
         });
 
         if (response.ok) {
-            // 3. Bersihkan data di localStorage spesifik untuk Admin
             const keysToRemove = [
                 'isLoggedIn', 'userEmail', 'userUsername',
                 'userRole', 'userName', 'currentKontigen'
             ];
             keysToRemove.forEach(key => localStorage.removeItem(key));
 
-            // Jika Anda masih menggunakan tracker online lokal dari versi lama
             if (typeof IU_setOffline === 'function') {
                 IU_setOffline();
             }
 
-            // 4. Redirect kembali ke halaman login
             window.location.href = '/login';
         } else {
             notify('Gagal melakukan logout. Silakan coba lagi.', 'error');
