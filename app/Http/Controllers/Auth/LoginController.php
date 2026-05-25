@@ -52,12 +52,16 @@ class LoginController extends Controller
             ->withErrors(['username' => 'Role tidak valid.']);
     }
 
-    public function logout(Request $request): RedirectResponse
+    public function logout(Request $request)
     {
         Auth::logout();
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();
+
+        if ($request->wantsJson()) {
+            return response()->json(['message' => 'Berhasil logout']);
+        }
 
         return redirect()->route('login');
     }

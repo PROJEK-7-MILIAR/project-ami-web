@@ -15,6 +15,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="csrf-token" content="{{ csrf_token() }}">
   <title>Dashboard Statistik - Super Admin ATLET</title>
 
   <link rel="stylesheet" href="/css/superadmin/dashboard.css">
@@ -41,7 +42,7 @@
   <aside class="sidebar">
     <nav class="nav-menu">
       <a class="nav-item active" href="dashboard.html">📊 Dashboard</a>
-      <a class="nav-item" href="kontingen.html">🏢 Manajemen Kontingen</a>
+      <a class="nav-item" href="{{ route('superadmin.kontingen.list') }}">🏢 Manajemen Kontingen</a>
       <a class="nav-item" href="{{ route('superadmin.admins.list') }}">👥 Manajemen Admin</a>
       <a class="nav-item" href="monitoring.html">🔍 Monitoring Data</a>
       <a class="nav-item" href="activity-log.html">📝 Activity Log</a>

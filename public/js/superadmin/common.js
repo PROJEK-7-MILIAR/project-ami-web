@@ -197,17 +197,64 @@ const App = {
   }
 };
 
-function logout() {
-  const confirmed = confirm('Yakin ingin logout?');
+async function logout() {
+  try {
+    const confirmed = await askConfirm('Yakin ingin logout?');
+    if (!confirmed) return;
 
-  if (!confirmed) return;
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
 
-  localStorage.removeItem('currentUser');
-  localStorage.removeItem('userName');
-  localStorage.removeItem('userEmail');
-  localStorage.removeItem('userRole');
+    const response = await fetch('/logout', {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'X-CSRF-TOKEN': csrfToken
+      }
+    });
 
-  window.location.href = '/auth/login.html';
+    if (response.ok) {
+      const username = localStorage.getItem('userUsername');
+      const email = localStorage.getItem('userEmail');
+      let onlineUsers = JSON.parse(localStorage.getItem('onlineUsers')) || [];
+
+      onlineUsers = onlineUsers.filter(user => user.username !== username && user.email !== email);
+      localStorage.setItem('onlineUsers', JSON.stringify(onlineUsers));
+
+      const keysToRemove = [
+        'isLoggedIn', 'userEmail', 'userUsername',
+        'userRole', 'userName', 'currentKontigen'
+      ];
+      keysToRemove.forEach(key => localStorage.removeItem(key));
+
+      await notify('Anda berhasil logout.', 'success', 900);
+      window.location.href = '/login';
+
+    } else {
+      notify('Gagal melakukan logout. Silakan coba lagi.', 'error');
+    }
+
+  } catch (error) {
+    console.error('Logout error:', error);
+    notify('Terjadi kesalahan koneksi ke server.', 'error');
+  }
+}
+
+function notify(message, type = 'info', duration = 2200) {
+  if (typeof showToast === 'function') {
+    return showToast(message, type, duration);
+  }
+
+  alert(message);
+  return Promise.resolve(true);
+}
+
+function askConfirm(message) {
+  if (typeof customConfirm === 'function') {
+    return customConfirm(message);
+  }
+
+  return Promise.resolve(confirm(message));
 }
 
 document.addEventListener('DOMContentLoaded', function () {
