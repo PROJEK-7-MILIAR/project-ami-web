@@ -3,6 +3,7 @@
 @php
   $authUser = auth()->user();
   $authUserPayload = [
+    'id' => $authUser->id,
     'name' => $authUser->name,
     'email' => $authUser->email,
     'username' => $authUser->username,
@@ -13,6 +14,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="csrf-token" content="{{ csrf_token() }}">
   <title>Detail Kontingen - ATLET</title>
 
   <link rel="stylesheet" href="/css/admin/kontingen-detail-styles.css">
@@ -37,7 +39,7 @@
   <div class="breadcrumb">
     <div class="breadcrumb-content">
       <a href="{{ route('admin.dashboard') }}">← Kembali ke Dashboard</a>
-      <span id="breadcrumbTitle"> / Kontingen Detail</span>
+      <span id="breadcrumbTitle"> / {{ $kontingen->name }}</span>
     </div>
   </div>
 
@@ -45,10 +47,12 @@
 
     <section class="kontingen-header">
       <div>
-        <h2 id="kontigenName">Nama Kontingen</h2>
-        <p id="kontigenAddress" class="kontigen-address">Alamat</p>
+        <h2 id="kontigenName">{{ $kontingen->name }}</h2>
+        <p id="kontigenAddress" class="kontigen-address">
+            {{ $kontingen->address ?? $kontingen->desc ?? 'Alamat belum diisi' }}
+        </p>
         <p class="kontigen-code">
-          Kode: <code id="kontigenCode">ABC123</code>
+          Kode: <code id="kontigenCode">{{ $kontingen->code }}</code>
         </p>
       </div>
     </section>

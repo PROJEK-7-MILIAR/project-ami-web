@@ -3,6 +3,7 @@
 @php
   $authUser = auth()->user();
   $authUserPayload = [
+    'id' => $authUser->id,
     'name' => $authUser->name,
     'email' => $authUser->email,
     'username' => $authUser->username,

@@ -5,6 +5,10 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Superadmin\AdminManagemetController;
 use App\Http\Controllers\Admin\KontingenController;
+use App\Http\Controllers\Admin\KontingenDetailController;
+use App\Http\Controllers\Admin\PelatihController;
+use App\Http\Controllers\Admin\AtletController;
+use App\Http\Controllers\Admin\JadwalController;
 
 Route::get('/', function () {
     return view('index');
@@ -83,15 +87,36 @@ Route::middleware('auth')->group(function () {
         })->name('superadmin.settings');
 
     // Admin Routes
-    Route::middleware('role:admin,superadmin')->group(function () {
+    Route::middleware('role:admin')->group(function () {
 
+        // Dashboard Admin
         Route::get('/admin/dashboard', function () {
             return view('admin.home');
         })->name('admin.dashboard');
 
+        // Manajemen Kontingen Utama
         Route::get('/admin/kontingen-list', [KontingenController::class, 'index']);
         Route::post('/admin/kontingen', [KontingenController::class, 'store']);
         Route::put('/admin/kontingen/{kontingen}', [KontingenController::class, 'update']);
         Route::delete('/admin/kontingen/{kontingen}', [KontingenController::class, 'destroy']);
-        });
+
+        //  Detail Page
+        Route::get('/admin/kontingen-detail/{id}', [KontingenDetailController::class, 'show'])->name('kontingen.detail');
+        Route::get('/admin/kontingen-detail/{id}/data', [KontingenDetailController::class, 'getAllData']);
+
+        // CRUD Pelatih
+        Route::post('/admin/kontingen/{id}/pelatih', [PelatihController::class, 'store']);
+        Route::put('/admin/pelatih/{pelatih}', [PelatihController::class, 'update']);
+        Route::delete('/admin/pelatih/{pelatih}', [PelatihController::class, 'destroy']);
+
+        // CRUD Atlet
+        Route::post('/admin/kontingen/{id}/atlet', [AtletController::class, 'store']);
+        Route::put('/admin/atlet/{atlet}', [AtletController::class, 'update']);
+        Route::delete('/admin/atlet/{atlet}', [AtletController::class, 'destroy']);
+
+        // CRUD Jadwal Pertandingan
+        Route::post('/admin/kontingen/{id}/jadwal', [JadwalController::class, 'store']);
+        Route::put('/admin/jadwal/{jadwal}', [JadwalController::class, 'update']);
+        Route::delete('/admin/jadwal/{jadwal}', [JadwalController::class, 'destroy']);
+    });
 });
