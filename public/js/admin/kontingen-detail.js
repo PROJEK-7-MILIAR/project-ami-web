@@ -275,7 +275,7 @@ async function deletePersonData(type, id) {
 }
 
 // =========================================================
-// FILES (PROGRAM & LAPORAN)
+// FILES (PROGRAM & LAPORAN) DENGAN CHECKBOX
 // =========================================================
 async function uploadProgram(e) { e.preventDefault(); await submitFileData('program', 'uploadProgramForm', 'uploadProgramModal'); }
 async function uploadLaporanBulanan(e) { e.preventDefault(); await submitFileData('laporan', 'uploadLaporanForm', 'uploadLaporanModal'); }
@@ -318,12 +318,15 @@ async function submitFileData(type, formId, modalId) {
     }
 }
 
-function renderProgram() { renderFileList(programList, 'programList'); }
-function renderLaporanBulanan() { renderFileList(laporanBulananList, 'laporanBulananList'); }
+function renderProgram() { renderFileList(programList, 'programList', 'program'); }
+function renderLaporanBulanan() { renderFileList(laporanBulananList, 'laporanBulananList', 'laporan'); }
 
-function renderFileList(list, containerId) {
+function renderFileList(list, containerId, type) {
     const container = document.getElementById(containerId);
     if (!container) return;
+
+    const masterCheckbox = document.getElementById(type === 'program' ? 'selectAllProgram' : 'selectAllLaporan');
+    if (masterCheckbox) masterCheckbox.checked = false;
 
     if (list.length === 0) {
         container.innerHTML = '<div class="empty-state">Belum ada file</div>';
@@ -334,19 +337,22 @@ function renderFileList(list, containerId) {
         const owner = isDataOwner(file);
         const icon = getFileIcon(file.file_type || file.file_name);
         return `
-            <div class="program-item">
+            <div class="program-item" style="display: flex; align-items: flex-start; gap: 15px;">
+
+                <input type="checkbox" class="checkbox-${type}" value="${file.id}" style="width: 18px; height: 18px; cursor: pointer; margin-top: 14px;">
+
                 <div style="display: flex; align-items: flex-start; flex: 1;">
                     <div class="program-item-icon">${icon}</div>
                     <div class="program-info">
-                        <h4>${escapeHTML(file.nama)}</h4>
+                        <h4 style="margin-top: 0;">${escapeHTML(file.nama)}</h4>
                         <p>File: ${escapeHTML(file.file_name)}</p>
                         <p>Tanggal: ${formatDate(file.created_at)}</p>
                         ${file.desc ? `<p>${escapeHTML(file.desc)}</p>` : ''}
                         <p style="font-size: 12px; color: #777; margin-top: 8px;">Dibuat oleh: ${escapeHTML(file.creator?.name || '-')}</p>
                     </div>
                 </div>
-                <div class="program-actions">
-                    <button onclick="window.open('${file.file_path}', '_blank')">📥 Download</button>
+                <div class="program-actions" style="margin-top: 5px;">
+                    <button onclick="window.location.href='/admin/file/${file.id}/download'">📥 Download</button>
                     ${owner
                         ? `<button class="delete" onclick="deleteFile(${file.id})">🗑 Hapus</button>`
                         : `<button disabled style="opacity: 0.5;">🔒 Terkunci</button>`}
@@ -376,6 +382,41 @@ function getFileIcon(type) {
     if (type.includes('png') || type.includes('jpg')) return '🖼️';
     return '📋';
 }
+
+window.toggleSelectAll = function(type) {
+    const masterCheckbox = document.getElementById(type === 'program' ? 'selectAllProgram' : 'selectAllLaporan');
+    const checkboxes = document.querySelectorAll(`.checkbox-${type}`);
+
+    checkboxes.forEach(cb => cb.checked = masterCheckbox.checked);
+};
+
+window.downloadSelected = function(type) {
+    const selectedCheckboxes = document.querySelectorAll(`.checkbox-${type}:checked`);
+
+    if (selectedCheckboxes.length === 0) {
+        return notify('Pilih minimal satu file yang ingin didownload.', 'warning');
+    }
+
+    notify(`Memulai unduhan ${selectedCheckboxes.length} file...`, 'info');
+
+    selectedCheckboxes.forEach((cb, index) => {
+        setTimeout(() => {
+            const iframe = document.createElement('iframe');
+            iframe.style.display = 'none';
+
+            iframe.src = `/admin/file/${cb.value}/download`;
+
+            document.body.appendChild(iframe);
+
+            setTimeout(() => {
+                if (document.body.contains(iframe)) {
+                    document.body.removeChild(iframe);
+                }
+            }, 10000);
+
+        }, index * 1200);
+    });
+};
 
 // =========================================================
 // JADWAL

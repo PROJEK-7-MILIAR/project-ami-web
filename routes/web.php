@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\KontingenDetailController;
 use App\Http\Controllers\Admin\PelatihController;
 use App\Http\Controllers\Admin\AtletController;
 use App\Http\Controllers\Admin\JadwalController;
+use App\Http\Controllers\Admin\KontingenFileController;
 
 Route::get('/', function () {
     return view('index');
@@ -118,5 +119,10 @@ Route::middleware('auth')->group(function () {
         Route::post('/admin/kontingen/{id}/jadwal', [JadwalController::class, 'store']);
         Route::put('/admin/jadwal/{jadwal}', [JadwalController::class, 'update']);
         Route::delete('/admin/jadwal/{jadwal}', [JadwalController::class, 'destroy']);
+
+        // Laporan Bulanan
+        Route::post('/admin/kontingen/{id}/file', [KontingenFileController::class, 'store']);
+        Route::delete('/admin/file/{file}', [KontingenFileController::class, 'destroy']);
+        Route::get('/admin/file/{file}/download', [KontingenFileController::class, 'download']);
     });
 });

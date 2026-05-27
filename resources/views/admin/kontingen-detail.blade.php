@@ -113,17 +113,22 @@
         </div>
       </div>
 
-      <div id="program-latihan" class="tab-content">
+    <div id="program-latihan" class="tab-content">
         <div class="section-header">
           <h3>Program Latihan</h3>
 
-          <div class="button-group-small">
+          <div class="button-group-small" style="align-items: center;">
+            <label style="cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 14px; margin-right: 10px;">
+              <input type="checkbox" id="selectAllProgram" onchange="toggleSelectAll('program')" style="width: 16px; height: 16px;">
+              Pilih Semua
+            </label>
+
             <button class="btn-primary" onclick="openUploadProgramModal()">
               📤 Upload File
             </button>
 
-            <button class="btn-secondary" onclick="downloadProgram()">
-              📥 Download
+            <button class="btn-secondary" onclick="downloadSelected('program')">
+              📥 Download Pilihan
             </button>
           </div>
         </div>
@@ -178,17 +183,22 @@
         </div>
       </div>
 
-      <div id="laporan-bulanan" class="tab-content">
+    <div id="laporan-bulanan" class="tab-content">
         <div class="section-header">
           <h3>Laporan Bulanan</h3>
 
-          <div class="button-group-small">
+          <div class="button-group-small" style="align-items: center;">
+            <label style="cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 14px; margin-right: 10px;">
+              <input type="checkbox" id="selectAllLaporan" onchange="toggleSelectAll('laporan')" style="width: 16px; height: 16px;">
+              Pilih Semua
+            </label>
+
             <button class="btn-primary" onclick="openUploadLaporanModal()">
               📤 Upload File
             </button>
 
-            <button class="btn-secondary" onclick="downloadLaporanBulanan()">
-              📥 Download
+            <button class="btn-secondary" onclick="downloadSelected('laporan')">
+              📥 Download Pilihan
             </button>
           </div>
         </div>
