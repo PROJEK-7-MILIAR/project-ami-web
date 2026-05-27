@@ -544,9 +544,8 @@ function renderAbsensiTable(date) {
     `;
 
     atletList.forEach((atlet, index) => {
-        // Cari apakah ada rekam absensi untuk atlet ini di tanggal yang dipilih
         const record = absensiData.find(a => a.atlet_id === atlet.id && a.tanggal === date);
-        const status = record?.status || 'hadir'; // Default hadir jika belum diisi
+        const status = record?.status || 'hadir'; 
         const owner = !record || record.created_by === window.authUser?.id;
 
         html += `
@@ -583,10 +582,10 @@ window.updateAbsensi = async function(tanggal, atletId, status) {
 
         if (!response.ok) throw new Error();
         notify('Absensi diperbarui.', 'success', 1000);
-        await loadDetailData(); // Refresh data absensi dari DB
+        await loadDetailData();
     } catch (error) {
         notify('Gagal menyimpan absensi.', 'error');
-        renderAbsensiTable(tanggal); // Kembalikan UI jika gagal
+        renderAbsensiTable(tanggal);
     }
 };
 
