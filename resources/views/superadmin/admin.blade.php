@@ -29,9 +29,9 @@
 
   <aside class="sidebar">
     <nav class="nav-menu">
-      <a class="nav-item active" href="{{ route('superadmin.dashboard') }}">📊 Dashboard</a>
+      <a class="nav-item" href="{{ route('superadmin.dashboard') }}">📊 Dashboard</a>
       <a class="nav-item" href="{{ route('superadmin.kontingen.list') }}">🏢 Manajemen Kontingen</a>
-      <a class="nav-item" href="{{ route('superadmin.admins.list') }}">👥 Manajemen Admin</a>
+      <a class="nav-item active" href="{{ route('superadmin.admins.list') }}">👥 Manajemen Admin</a>
       <a class="nav-item" href="{{ route('superadmin.monitoring') }}">🔍 Monitoring Data</a>
       <a class="nav-item" href="{{ route('superadmin.activity-log') }}">📝 Activity Log</a>
       <a class="nav-item" href="{{ route('superadmin.export') }}">📥 Export Data</a>
