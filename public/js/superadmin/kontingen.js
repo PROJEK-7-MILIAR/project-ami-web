@@ -1,262 +1,89 @@
 document.addEventListener('DOMContentLoaded', function () {
-  renderKontingenManagement();
-  setupKontingenEvents();
+    renderKontingenManagement();
 });
 
-function setupKontingenEvents() {
-  const openBtn = document.getElementById('openAddKontingenBtn');
-  const closeBtn = document.getElementById('closeAddKontingenModal');
-  const cancelBtn = document.getElementById('cancelAddKontingen');
-  const form = document.getElementById('addKontingenForm');
-  const modal = document.getElementById('addKontingenModal');
-  const nameInput = document.getElementById('kontingenName');
-  const codeInput = document.getElementById('kontingenCode');
+async function renderKontingenManagement() {
+    const container = document.getElementById('kontingenList');
+    if (!container) return;
 
-  if (openBtn) {
-    openBtn.addEventListener('click', openAddKontingenModal);
-  }
+    try {
+        const response = await fetch('/superadmin/kontingen/data', {
+            headers: { 'Accept': 'application/json' }
+        });
 
-  if (closeBtn) {
-    closeBtn.addEventListener('click', closeAddKontingenModal);
-  }
+        if (!response.ok) throw new Error('Gagal memuat data');
+        const kontingen = await response.json();
 
-  if (cancelBtn) {
-    cancelBtn.addEventListener('click', closeAddKontingenModal);
-  }
+        if (kontingen.length === 0) {
+            container.innerHTML = '<div class="empty-state">Belum ada kontingen yang terdaftar di sistem.</div>';
+            return;
+        }
 
-  if (form) {
-    form.addEventListener('submit', function (event) {
-      event.preventDefault();
-      addKontingen();
-    });
-  }
+        container.innerHTML = '';
 
-  if (modal) {
-    modal.addEventListener('click', function (event) {
-      if (event.target === modal) {
-        closeAddKontingenModal();
-      }
-    });
-  }
+        // Looping data dari database
+        kontingen.forEach(function (item) {
+            const card = document.createElement('div');
+            card.className = 'kontingen-admin-card';
 
-  if (nameInput && codeInput) {
-    nameInput.addEventListener('input', function () {
-      if (codeInput.dataset.edited === 'true') return;
+            card.innerHTML = `
+                <div class="kontingen-admin-info">
+                    <h3>${App.escapeHTML(item.name || '-')}</h3>
 
-      const generatedCode = generateKontingenCode(nameInput.value);
+                    <p><strong>Kode:</strong> ${App.escapeHTML(item.code || '-')}</p>
+                    <p><strong>Pemilik:</strong> ${App.escapeHTML(item.owner?.name || item.owner?.username || 'Tidak ada')}</p>
+                    <p><strong>Alamat:</strong> ${App.escapeHTML(item.address || '-')}</p>
 
-      codeInput.value = generatedCode;
-    });
+                    <div class="data-badge-group">
+                        <span class="data-badge">👨‍🏫 ${item.pelatihs_count || 0} Pelatih</span>
+                        <span class="data-badge">👥 ${item.atlets_count || 0} Atlet</span>
+                        <span class="data-badge">📋 ${item.absensis_count || 0} Absensi</span>
+                    </div>
+                </div>
 
-    codeInput.addEventListener('input', function () {
-      codeInput.dataset.edited = 'true';
-      codeInput.value = codeInput.value.toUpperCase();
-    });
-  }
+                <div class="kontingen-admin-actions">
+                    <button type="button" class="btn-danger" data-delete="${item.id}">
+                        🗑 Hapus
+                    </button>
+                </div>
+            `;
+            container.appendChild(card);
+        });
+
+        // Binding event hapus ke setiap tombol
+        container.querySelectorAll('[data-delete]').forEach(button => {
+            button.addEventListener('click', () => deleteKontingen(button.dataset.delete));
+        });
+
+    } catch (error) {
+        container.innerHTML = '<div class="empty-state">Terjadi kesalahan saat memuat data kontingen.</div>';
+        console.error(error);
+    }
 }
 
-function openAddKontingenModal() {
-  const modal = document.getElementById('addKontingenModal');
+async function deleteKontingen(id) {
+    const confirmed = await askConfirm('Yakin ingin menghapus kontingen ini? Semua data atlet, pelatih, absensi, dan file di dalamnya akan terhapus permanen.');
+    if (!confirmed) return;
 
-  if (modal) {
-    modal.classList.add('show');
-  }
-}
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
 
-function closeAddKontingenModal() {
-  const modal = document.getElementById('addKontingenModal');
-  const form = document.getElementById('addKontingenForm');
-  const codeInput = document.getElementById('kontingenCode');
+    try {
+        const response = await fetch(`/superadmin/kontingen/${id}`, {
+            method: 'DELETE',
+            headers: {
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': csrfToken
+            }
+        });
 
-  if (modal) {
-    modal.classList.remove('show');
-  }
+        if (!response.ok) throw new Error('Gagal menghapus kontingen');
 
-  if (form) {
-    form.reset();
-  }
+        notify('Kontingen dan seluruh datanya berhasil dihapus.', 'success');
 
-  if (codeInput) {
-    codeInput.dataset.edited = 'false';
-  }
-}
+        await renderKontingenManagement();
 
-function renderKontingenManagement() {
-  const container = document.getElementById('kontingenList');
-
-  if (!container) return;
-
-  const kontingen = App.loadKontingen();
-
-  if (!kontingen.length) {
-    container.innerHTML = '<div class="empty-state">Belum ada kontingen</div>';
-    return;
-  }
-
-  container.innerHTML = '';
-
-  kontingen.forEach(function (item) {
-    const detail = App.getDetail(item.code);
-
-    const totalPelatih = (detail.pelatih || []).length;
-    const totalAtlet = (detail.atlet || []).length;
-    const totalAbsensi = Object.keys(detail.absensi || {}).length;
-
-    const card = document.createElement('div');
-    card.className = 'kontingen-admin-card';
-
-    card.innerHTML = `
-      <div class="kontingen-admin-info">
-        <h3>${App.escapeHTML(item.name || '-')}</h3>
-
-        <p><strong>Kode:</strong> ${App.escapeHTML(item.code || '-')}</p>
-        <p><strong>Pemilik:</strong> ${App.escapeHTML(item.ownerName || item.owner || '-')}</p>
-        <p><strong>Alamat:</strong> ${App.escapeHTML(item.address || '-')}</p>
-
-        <div class="data-badge-group">
-          <span class="data-badge">👨‍🏫 ${totalPelatih} Pelatih</span>
-          <span class="data-badge">👥 ${totalAtlet} Atlet</span>
-          <span class="data-badge">📋 ${totalAbsensi} Absensi</span>
-        </div>
-      </div>
-
-      <div class="kontingen-admin-actions">
-        <button type="button" class="btn-danger" data-delete="${item.id}">
-          🗑 Hapus
-        </button>
-      </div>
-    `;
-
-    container.appendChild(card);
-  });
-
-  container.querySelectorAll('[data-delete]').forEach(function (button) {
-    button.addEventListener('click', function () {
-      deleteKontingen(Number(button.dataset.delete));
-    });
-  });
-}
-
-function addKontingen() {
-  const nameInput = document.getElementById('kontingenName');
-  const codeInput = document.getElementById('kontingenCode');
-  const ownerInput = document.getElementById('kontingenOwner');
-  const addressInput = document.getElementById('kontingenAddress');
-
-  const name = nameInput.value.trim();
-  const code = codeInput.value.trim().toUpperCase();
-  const ownerName = ownerInput.value.trim();
-  const address = addressInput.value.trim();
-
-  if (!name || !code) {
-    App.notify('Nama kontingen dan kode kontingen wajib diisi.');
-    return;
-  }
-
-  if (code.length < 2) {
-    App.notify('Kode kontingen minimal 2 karakter.');
-    return;
-  }
-
-  const kontingen = App.loadKontingen();
-
-  const isCodeExists = kontingen.some(function (item) {
-    return String(item.code || '').toLowerCase() === code.toLowerCase();
-  });
-
-  if (isCodeExists) {
-    App.notify('Kode kontingen sudah digunakan.');
-    return;
-  }
-
-  const newKontingen = {
-    id: Date.now(),
-    code: code,
-    name: name,
-    ownerName: ownerName || 'Super Admin',
-    address: address || '-',
-    createdAt: new Date().toISOString()
-  };
-
-  kontingen.push(newKontingen);
-
-  App.saveKontingen(kontingen);
-
-  App.saveDetail(code, {
-    pelatih: [],
-    atlet: [],
-    absensi: {},
-    jadwal: [],
-    program: [],
-    pengukuran: []
-  });
-
-  App.addLog(
-    'create',
-    'Menambahkan kontingen baru: ' + name,
-    'Kode: ' + code
-  );
-
-  closeAddKontingenModal();
-  renderKontingenManagement();
-
-  App.notify('Kontingen berhasil ditambahkan.');
-}
-
-function deleteKontingen(id) {
-  const kontingen = App.loadKontingen();
-
-  const selected = kontingen.find(function (item) {
-    return item.id === id;
-  });
-
-  if (!selected) {
-    App.notify('Kontingen tidak ditemukan.');
-    return;
-  }
-
-  const confirmed = confirm(
-    'Yakin ingin menghapus kontingen "' + selected.name + '"? Semua data di dalamnya akan ikut terhapus.'
-  );
-
-  if (!confirmed) return;
-
-  const updatedKontingen = kontingen.filter(function (item) {
-    return item.id !== id;
-  });
-
-  App.saveKontingen(updatedKontingen);
-
-  localStorage.removeItem('kontingen_' + selected.code);
-
-  App.addLog(
-    'delete',
-    'Menghapus kontingen: ' + selected.name,
-    'Kode: ' + selected.code
-  );
-
-  renderKontingenManagement();
-
-  App.notify('Kontingen berhasil dihapus.');
-}
-
-function generateKontingenCode(name) {
-  if (!name) return '';
-
-  const words = name
-    .trim()
-    .split(/\s+/)
-    .filter(Boolean);
-
-  if (words.length === 1) {
-    return words[0].substring(0, 3).toUpperCase();
-  }
-
-  return words
-    .map(function (word) {
-      return word.charAt(0);
-    })
-    .join('')
-    .substring(0, 4)
-    .toUpperCase();
+    } catch (error) {
+        notify('Terjadi kesalahan saat menghapus data.', 'error');
+        console.error(error);
+    }
 }

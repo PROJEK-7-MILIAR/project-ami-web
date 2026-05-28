@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Superadmin\AdminManagemetController;
+use App\Http\Controllers\Superadmin\KontingenController as SuperAdminKontingenController;
 use App\Http\Controllers\Admin\KontingenController;
 use App\Http\Controllers\Admin\KontingenDetailController;
 use App\Http\Controllers\Admin\PelatihController;
@@ -66,6 +67,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/superadmin/kontingen-list', function () {
             return view('superadmin.kontingen');
         })->name('superadmin.kontingen.list');
+        Route::get('/superadmin/kontingen/data', [SuperAdminKontingenController::class, 'getAllData']);
+        Route::delete('/superadmin/kontingen/{id}', [SuperAdminKontingenController::class, 'destroy']);
 
         // Monitoring Data
         Route::get('/superadmin/monitoring', function () {
