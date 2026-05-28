@@ -257,6 +257,8 @@ function askConfirm(message) {
   return Promise.resolve(confirm(message));
 }
 
+window.logout = logout;
+
 document.addEventListener('DOMContentLoaded', function () {
   App.loadUserInfo();
   App.setupLogout();

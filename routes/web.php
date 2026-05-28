@@ -5,6 +5,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Superadmin\AdminManagemetController;
 use App\Http\Controllers\Superadmin\KontingenController as SuperAdminKontingenController;
+use App\Http\Controllers\Superadmin\MonitoringController;
 use App\Http\Controllers\Admin\KontingenController;
 use App\Http\Controllers\Admin\KontingenDetailController;
 use App\Http\Controllers\Admin\PelatihController;
@@ -16,36 +17,22 @@ Route::get('/', function () {
     return view('index');
 });
 
-// Testing: Get CSRF Token
-    Route::get('/csrf-token', function () {
-        return response()->json([
-            'csrf_token' => csrf_token()
-        ]);
-    });
-
 // Guest Routes
 Route::middleware('guest')->group(function () {
-
-    Route::get('/login', [LoginController::class, 'index'])
-        ->name('login');
-
-    Route::get('/register', [RegisterController::class, 'index'])
-        ->name('register');
-
-    Route::post('/register', [RegisterController::class, 'store'])
-        ->name('register.store');
-
-    Route::post('/login', [LoginController::class, 'authenticate'])
-        ->name('login.authenticate');
+    Route::get('/login', [LoginController::class, 'index'])->name('login');
+    Route::get('/register', [RegisterController::class, 'index'])->name('register');
+    Route::post('/register', [RegisterController::class, 'store'])->name('register.store');
+    Route::post('/login', [LoginController::class, 'authenticate'])->name('login.authenticate');
 });
 
 // Authenticated Routes
 Route::middleware('auth')->group(function () {
 
-    Route::post('/logout', [LoginController::class, 'logout'])
-        ->name('logout');
+    Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
-    // Superadmin Routes
+    // =========================================================
+    // SUPERADMIN ROUTES
+    // =========================================================
     Route::middleware('role:superadmin')->group(function () {
 
         Route::get('/superadmin/dashboard', function () {
@@ -53,15 +40,10 @@ Route::middleware('auth')->group(function () {
         })->name('superadmin.dashboard');
 
         // Admin User Management
-        Route::get('/superadmin/admins-list', [AdminManagemetController::class, 'index'])
-            ->name('superadmin.admins.list');
-        Route::post('/superadmin/admins-store', [AdminManagemetController::class, 'store'])
-            ->name('superadmin.admins.store');
-        Route::put('/superadmin/admins-update/{admin}', [AdminManagemetController::class, 'update'])
-            ->name('superadmin.admins.update');
-        Route::delete('/superadmin/admins-delete/{admin}', [AdminManagemetController::class, 'destroy'])
-            ->name('superadmin.admins.destroy');
-        });
+        Route::get('/superadmin/admins-list', [AdminManagemetController::class, 'index'])->name('superadmin.admins.list');
+        Route::post('/superadmin/admins-store', [AdminManagemetController::class, 'store'])->name('superadmin.admins.store');
+        Route::put('/superadmin/admins-update/{admin}', [AdminManagemetController::class, 'update'])->name('superadmin.admins.update');
+        Route::delete('/superadmin/admins-delete/{admin}', [AdminManagemetController::class, 'destroy'])->name('superadmin.admins.destroy');
 
         // Kontingen Management
         Route::get('/superadmin/kontingen-list', function () {
@@ -74,6 +56,9 @@ Route::middleware('auth')->group(function () {
         Route::get('/superadmin/monitoring', function () {
             return view('superadmin.monitoring');
         })->name('superadmin.monitoring');
+        Route::get('/superadmin/monitoring/pelatih', [MonitoringController::class, 'getPelatih']);
+        Route::get('/superadmin/monitoring/atlet', [MonitoringController::class, 'getAtlet']);
+        Route::get('/superadmin/monitoring/absensi', [MonitoringController::class, 'getAbsensi']);
 
         // Activity Log
         Route::get('/superadmin/activity-log', function () {
@@ -90,7 +75,12 @@ Route::middleware('auth')->group(function () {
             return view('superadmin.settings');
         })->name('superadmin.settings');
 
-    // Admin Routes
+    });
+
+
+    // =========================================================
+    // ADMIN ROUTES
+    // =========================================================
     Route::middleware('role:admin')->group(function () {
 
         // Dashboard Admin
@@ -104,7 +94,7 @@ Route::middleware('auth')->group(function () {
         Route::put('/admin/kontingen/{kontingen}', [KontingenController::class, 'update']);
         Route::delete('/admin/kontingen/{kontingen}', [KontingenController::class, 'destroy']);
 
-        //  Detail Page
+        // Detail Page
         Route::get('/admin/kontingen-detail/{id}', [KontingenDetailController::class, 'show'])->name('kontingen.detail');
         Route::get('/admin/kontingen-detail/{id}/data', [KontingenDetailController::class, 'getAllData']);
 
@@ -123,9 +113,10 @@ Route::middleware('auth')->group(function () {
         Route::put('/admin/jadwal/{jadwal}', [JadwalController::class, 'update']);
         Route::delete('/admin/jadwal/{jadwal}', [JadwalController::class, 'destroy']);
 
-        // Laporan Bulanan
+        // File Management (Program Latihan & Laporan Bulanan)
         Route::post('/admin/kontingen/{id}/file', [KontingenFileController::class, 'store']);
         Route::delete('/admin/file/{file}', [KontingenFileController::class, 'destroy']);
         Route::get('/admin/file/{file}/download', [KontingenFileController::class, 'download']);
     });
+
 });

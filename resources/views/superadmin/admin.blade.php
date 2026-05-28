@@ -178,6 +178,7 @@
 
   <script src="{{ asset('js/custom-alert.js') }}"></script>
   <script src="{{ asset('js/superadmin/admin.js') }}"></script>
+  <script src="{{ asset('js/superadmin/common.js') }}"></script>
 </body>
 
 </html>

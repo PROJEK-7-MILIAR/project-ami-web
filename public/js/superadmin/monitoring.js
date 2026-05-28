@@ -1,185 +1,144 @@
-let currentMonitoringTab = 'pelatih';
-
 document.addEventListener('DOMContentLoaded', function () {
-  setupMonitoringTabs();
-  renderMonitoring('pelatih');
+    renderMonitoring('pelatih');
 });
 
-function setupMonitoringTabs() {
-  const buttons = document.querySelectorAll('.tab-button');
+window.switchMonitoringTab = function (tab) {
+    document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
 
-  buttons.forEach(function (button) {
-    button.addEventListener('click', function () {
-      const tab = button.dataset.tab;
+    if (window.event && window.event.currentTarget) {
+        window.event.currentTarget.classList.add('active');
+    }
 
-      buttons.forEach(function (item) {
-        item.classList.remove('active');
-      });
+    renderMonitoring(tab);
+};
 
-      button.classList.add('active');
-      renderMonitoring(tab);
-    });
-  });
+function escapeHTML(str) {
+    return String(str || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
 }
 
-function renderMonitoring(tab) {
-  currentMonitoringTab = tab;
+async function renderMonitoring(tab) {
+    const container = document.getElementById('monitoringContent');
+    if (!container) return;
 
-  if (tab === 'pelatih') {
-    renderPelatihMonitoring();
-    return;
-  }
+    container.innerHTML = '<div class="empty-state">⏳ Memuat data...</div>';
 
-  if (tab === 'atlet') {
-    renderAtletMonitoring();
-    return;
-  }
+    try {
+        const response = await fetch(`/superadmin/monitoring/${tab}`, {
+            headers: { 'Accept': 'application/json' }
+        });
 
-  if (tab === 'absensi') {
-    renderAbsensiMonitoring();
-    return;
-  }
+        if (!response.ok) throw new Error('Gagal memuat data dari server');
+        const data = await response.json();
+
+        if (tab === 'pelatih') renderPelatih(data, container);
+        if (tab === 'atlet') renderAtlet(data, container);
+        if (tab === 'absensi') renderAbsensi(data, container);
+
+    } catch (error) {
+        container.innerHTML = '<div class="empty-state" style="color: #ef4444;">❌ Terjadi kesalahan saat memuat data.</div>';
+        console.error(error);
+    }
 }
 
-function renderPelatihMonitoring() {
-  const container = document.getElementById('monitoringContent');
+// ---------------------------------------------------------
+// RENDERERS
+// ---------------------------------------------------------
 
-  if (!container) return;
+function renderPelatih(data, container) {
+    if (data.length === 0) {
+        return container.innerHTML = '<div class="empty-state">Belum ada data pelatih terdaftar.</div>';
+    }
 
-  const kontingen = App.loadKontingen();
-
-  let rows = '';
-
-  kontingen.forEach(function (item) {
-    const detail = App.getDetail(item.code);
-
-    (detail.pelatih || []).forEach(function (pelatih) {
-      rows += `
+    let rows = data.map(item => `
         <tr>
-          <td>${App.escapeHTML(item.name || '-')}</td>
-          <td>${App.escapeHTML(pelatih.nama || '-')}</td>
-          <td>${App.escapeHTML(pelatih.usia || '-')}</td>
-          <td>${App.escapeHTML(pelatih.ttl || '-')}</td>
-          <td>${App.escapeHTML(pelatih.createdByName || pelatih.createdBy || '-')}</td>
+            <td><strong>${escapeHTML(item.kontingen?.name || '-')}</strong></td>
+            <td>${escapeHTML(item.nama)}</td>
+            <td>${item.usia ? escapeHTML(item.usia) + ' thn' : '-'}</td>
+            <td>${item.ttl ? escapeHTML(item.ttl) : '-'}</td>
+            <td>${escapeHTML(item.creator?.name || '-')}</td>
         </tr>
-      `;
-    });
-  });
+    `).join('');
 
-  if (!rows) {
-    container.innerHTML = '<div class="empty-state">Belum ada data pelatih</div>';
-    return;
-  }
-
-  container.innerHTML = `
-    <h3>📊 Daftar Semua Pelatih</h3>
-
-    <table class="monitoring-table">
-      <thead>
-        <tr>
-          <th>Kontingen</th>
-          <th>Nama</th>
-          <th>Usia</th>
-          <th>TTL</th>
-          <th>Dibuat Oleh</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${rows}
-      </tbody>
-    </table>
-  `;
-}
-
-function renderAtletMonitoring() {
-  const container = document.getElementById('monitoringContent');
-
-  if (!container) return;
-
-  const kontingen = App.loadKontingen();
-
-  let rows = '';
-
-  kontingen.forEach(function (item) {
-    const detail = App.getDetail(item.code);
-
-    (detail.atlet || []).forEach(function (atlet) {
-      rows += `
-        <tr>
-          <td>${App.escapeHTML(item.name || '-')}</td>
-          <td>${App.escapeHTML(atlet.nama || '-')}</td>
-          <td>${App.escapeHTML(atlet.usia || '-')}</td>
-          <td>${App.escapeHTML(atlet.ttl || '-')}</td>
-          <td>${App.escapeHTML(atlet.createdByName || atlet.createdBy || '-')}</td>
-        </tr>
-      `;
-    });
-  });
-
-  if (!rows) {
-    container.innerHTML = '<div class="empty-state">Belum ada data atlet</div>';
-    return;
-  }
-
-  container.innerHTML = `
-    <h3>📊 Daftar Semua Atlet</h3>
-
-    <table class="monitoring-table">
-      <thead>
-        <tr>
-          <th>Kontingen</th>
-          <th>Nama</th>
-          <th>Usia</th>
-          <th>TTL</th>
-          <th>Dibuat Oleh</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${rows}
-      </tbody>
-    </table>
-  `;
-}
-
-function renderAbsensiMonitoring() {
-  const container = document.getElementById('monitoringContent');
-
-  if (!container) return;
-
-  const kontingen = App.loadKontingen();
-
-  let rows = '';
-
-  kontingen.forEach(function (item) {
-    const detail = App.getDetail(item.code);
-    const totalAbsensi = Object.keys(detail.absensi || {}).length;
-
-    rows += `
-      <tr>
-        <td>${App.escapeHTML(item.name || '-')}</td>
-        <td>${totalAbsensi}</td>
-      </tr>
+    container.innerHTML = `
+        <h3>📊 Daftar Semua Pelatih</h3>
+        <table class="monitoring-table">
+            <thead>
+                <tr>
+                    <th>Kontingen</th>
+                    <th>Nama Pelatih</th>
+                    <th>Usia</th>
+                    <th>Tgl Lahir</th>
+                    <th>Dibuat Oleh</th>
+                </tr>
+            </thead>
+            <tbody>${rows}</tbody>
+        </table>
     `;
-  });
+}
 
-  if (!rows) {
-    container.innerHTML = '<div class="empty-state">Belum ada data absensi</div>';
-    return;
-  }
+function renderAtlet(data, container) {
+    if (data.length === 0) {
+        return container.innerHTML = '<div class="empty-state">Belum ada data atlet terdaftar.</div>';
+    }
 
-  container.innerHTML = `
-    <h3>📊 Ringkasan Absensi</h3>
-
-    <table class="monitoring-table">
-      <thead>
+    let rows = data.map(item => `
         <tr>
-          <th>Kontingen</th>
-          <th>Total Record</th>
+            <td><strong>${escapeHTML(item.kontingen?.name || '-')}</strong></td>
+            <td>${escapeHTML(item.nama)}</td>
+            <td>${item.usia ? escapeHTML(item.usia) + ' thn' : '-'}</td>
+            <td>${item.ttl ? escapeHTML(item.ttl) : '-'}</td>
+            <td>${escapeHTML(item.creator?.name || '-')}</td>
         </tr>
-      </thead>
-      <tbody>
-        ${rows}
-      </tbody>
-    </table>
-  `;
+    `).join('');
+
+    container.innerHTML = `
+        <h3>📊 Daftar Semua Atlet</h3>
+        <table class="monitoring-table">
+            <thead>
+                <tr>
+                    <th>Kontingen</th>
+                    <th>Nama Atlet</th>
+                    <th>Usia</th>
+                    <th>Tgl Lahir</th>
+                    <th>Dibuat Oleh</th>
+                </tr>
+            </thead>
+            <tbody>${rows}</tbody>
+        </table>
+    `;
+}
+
+function renderAbsensi(data, container) {
+    if (data.length === 0) {
+        return container.innerHTML = '<div class="empty-state">Belum ada data kontingen untuk dihitung.</div>';
+    }
+
+    let rows = data.map(item => `
+        <tr>
+            <td><strong>${escapeHTML(item.name)}</strong></td>
+            <td>
+                <span style="background: #eff6ff; color: #2563eb; padding: 4px 10px; border-radius: 999px; font-weight: 800; font-size: 12px;">
+                    ${item.absensis_count} Data
+                </span>
+            </td>
+        </tr>
+    `).join('');
+
+    container.innerHTML = `
+        <h3>📊 Ringkasan Absensi Per Kontingen</h3>
+        <table class="monitoring-table">
+            <thead>
+                <tr>
+                    <th style="width: 70%;">Kontingen</th>
+                    <th>Total Record Absensi</th>
+                </tr>
+            </thead>
+            <tbody>${rows}</tbody>
+        </table>
+    `;
 }
