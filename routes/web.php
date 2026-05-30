@@ -6,6 +6,7 @@ use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Superadmin\AdminManagemetController;
 use App\Http\Controllers\Superadmin\KontingenController as SuperAdminKontingenController;
 use App\Http\Controllers\Superadmin\MonitoringController;
+use App\Http\Controllers\Superadmin\ActivityLogController;
 use App\Http\Controllers\Admin\KontingenController;
 use App\Http\Controllers\Admin\KontingenDetailController;
 use App\Http\Controllers\Admin\PelatihController;
@@ -64,6 +65,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/superadmin/activity-log', function () {
             return view('superadmin.activity-log');
         })->name('superadmin.activity-log');
+        Route::get('/superadmin/activity-log/data', [ActivityLogController::class, 'getLogs']);
 
         // Export Data
         Route::get('/superadmin/export', function () {

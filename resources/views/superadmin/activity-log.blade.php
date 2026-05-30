@@ -4,6 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="csrf-token" content="{{ csrf_token() }}">
   <title>Activity Log - Super Admin ATLET</title>
 
   <link rel="stylesheet" href="/css/superadmin/activity-log.css">
@@ -79,9 +80,9 @@
     </section>
   </main>
 
-  <script src="/js/custom-alert.js"></script>
-  <script src="/js/superadmin/activity-log.js"></script>
-  <script src="/js/superadmin/admin-dashboard.js"></script>
+  <script src="{{ asset('js/custom-alert.js') }}"></script>
+  <script src="{{ asset('js/superadmin/activity-log.js') }}"></script>
+  <script src="{{ asset('js/superadmin/dashboard.js') }}"></script>
 </body>
 
 </html>

@@ -1,83 +1,78 @@
 document.addEventListener('DOMContentLoaded', function () {
-  renderActivityLog();
-  setupActivityEvents();
+    renderActivityLog();
+    setupActivityEvents();
 });
 
 function setupActivityEvents() {
-  const filterBtn = document.getElementById('filterBtn');
-  const clearFilterBtn = document.getElementById('clearFilterBtn');
+    const filterType = document.getElementById('filterType');
+    const filterDate = document.getElementById('filterDate');
 
-  if (filterBtn) {
-    filterBtn.addEventListener('click', filterActivity);
-  }
+    if (filterType) {
+        filterType.addEventListener('change', renderActivityLog);
+    }
 
-  if (clearFilterBtn) {
-    clearFilterBtn.addEventListener('click', function () {
-      const filterDate = document.getElementById('filterDate');
-      const filterType = document.getElementById('filterType');
-
-      if (filterDate) filterDate.value = '';
-      if (filterType) filterType.value = '';
-
-      renderActivityLog();
-    });
-  }
+    if (filterDate) {
+        filterDate.addEventListener('change', renderActivityLog);
+    }
 }
 
-function renderActivityLog(logs = null) {
-  const tbody = document.getElementById('activityLog');
+async function renderActivityLog() {
+    const tbody = document.getElementById('activityLog');
+    if (!tbody) return;
 
-  if (!tbody) return;
+    tbody.innerHTML = '<tr><td colspan="5" class="empty-state">⏳ Memuat riwayat aktivitas...</td></tr>';
 
-  const activityLog = logs || App.loadActivity();
+    const filterType = document.getElementById('filterType')?.value || '';
+    const filterDate = document.getElementById('filterDate')?.value || '';
 
-  if (!activityLog.length) {
-    tbody.innerHTML = `
-      <tr>
-        <td colspan="5" class="empty-state">Tidak ada log aktivitas</td>
-      </tr>
-    `;
-    return;
-  }
+    const url = new URL(window.location.origin + '/superadmin/activity-log/data');
+    if (filterType) url.searchParams.append('type', filterType);
+    if (filterDate) url.searchParams.append('date', filterDate);
 
-  tbody.innerHTML = activityLog.map(function (log) {
-    const type = log.type || 'info';
+    try {
+        const response = await fetch(url, { headers: { 'Accept': 'application/json' } });
+        if (!response.ok) throw new Error('Gagal memuat data');
 
-    return `
-      <tr>
-        <td>${App.escapeHTML(log.timestamp || '-')}</td>
-        <td>${App.escapeHTML(log.admin || '-')}</td>
-        <td>
-          <span class="log-type ${App.escapeHTML(type)}">
-            ${App.escapeHTML(type)}
-          </span>
-        </td>
-        <td>${App.escapeHTML(log.description || '-')}</td>
-        <td>${App.escapeHTML(log.detail || '-')}</td>
-      </tr>
-    `;
-  }).join('');
+        const logs = await response.json();
+
+        if (logs.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" class="empty-state">Tidak ada log aktivitas yang ditemukan.</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = logs.map(log => {
+            const date = new Date(log.created_at);
+            const formattedDate = date.toLocaleString('id-ID', {
+                day: '2-digit', month: 'short', year: 'numeric',
+                hour: '2-digit', minute: '2-digit'
+            });
+
+            return `
+                <tr>
+                    <td>${formattedDate}</td>
+                    <td><strong>${escapeHTML(log.admin)}</strong></td>
+                    <td>
+                        <span class="log-type ${escapeHTML(log.type)}">
+                            ${escapeHTML(log.type)}
+                        </span>
+                    </td>
+                    <td>${escapeHTML(log.description)}</td>
+                    <td>${escapeHTML(log.detail || '-')}</td>
+                </tr>
+            `;
+        }).join('');
+
+    } catch (error) {
+        console.error(error);
+        tbody.innerHTML = '<tr><td colspan="5" class="empty-state" style="color: red;">❌ Gagal memuat data aktivitas.</td></tr>';
+    }
 }
 
-function filterActivity() {
-  const filterDate = document.getElementById('filterDate')?.value || '';
-  const filterType = document.getElementById('filterType')?.value || '';
-
-  let logs = App.loadActivity();
-
-  if (filterType) {
-    logs = logs.filter(function (log) {
-      return log.type === filterType;
-    });
-  }
-
-  if (filterDate) {
-    const selectedDate = new Date(filterDate).toLocaleDateString('id-ID');
-
-    logs = logs.filter(function (log) {
-      return String(log.timestamp || '').includes(selectedDate);
-    });
-  }
-
-  renderActivityLog(logs);
+function escapeHTML(str) {
+    return String(str || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
 }
