@@ -4,6 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="csrf-token" content="{{ csrf_token() }}">
   <title>Pengaturan Sistem - Super Admin ATLET</title>
 
   <link rel="stylesheet" href="/css/superadmin/settings.css">
@@ -46,7 +47,8 @@
       <div class="settings-section">
         <h3>🔐 Backup & Restore</h3>
         <button class="btn-primary" onclick="backupData()">💾 Backup Data</button>
-        <button class="btn-secondary" onclick="restoreData()">📂 Restore Data</button>
+        <button class="btn-secondary" onclick="document.getElementById('restoreFileInput').click()">📂 Restore Data</button>
+        <input type="file" id="restoreFileInput" accept=".json" style="display: none;" onchange="restoreData(event)">
       </div>
 
       <div class="settings-section">

@@ -9,6 +9,7 @@ use App\Http\Controllers\Superadmin\KontingenController as SuperAdminKontingenCo
 use App\Http\Controllers\Superadmin\MonitoringController;
 use App\Http\Controllers\Superadmin\ActivityLogController;
 use App\Http\Controllers\Superadmin\ExportController;
+use App\Http\Controllers\Superadmin\SettingsController;
 use App\Http\Controllers\Admin\KontingenController;
 use App\Http\Controllers\Admin\KontingenDetailController;
 use App\Http\Controllers\Admin\PelatihController;
@@ -80,7 +81,10 @@ Route::middleware('auth')->group(function () {
         Route::get('/superadmin/settings', function () {
             return view('superadmin.settings');
         })->name('superadmin.settings');
-
+        Route::get('/superadmin/settings/backup', [SettingsController::class, 'backup']);
+        Route::delete('/superadmin/settings/clear-logs', [SettingsController::class, 'clearLogs']);
+        Route::delete('/superadmin/settings/clear-all', [SettingsController::class, 'clearAllData']);
+        Route::post('/superadmin/settings/restore', [SettingsController::class, 'restore']);
     });
 
 
