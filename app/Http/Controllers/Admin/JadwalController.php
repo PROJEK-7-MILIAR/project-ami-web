@@ -4,12 +4,12 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Jadwal;
+use App\Models\ActivityLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class JadwalController extends Controller
 {
-    // 1. Tambah Jadwal Baru
     public function store(Request $request, $kontingenId)
     {
         $request->validate([
@@ -30,6 +30,12 @@ class JadwalController extends Controller
             'created_by' => Auth::id()
         ]);
 
+        ActivityLog::create([
+            'admin' => Auth::user()->name ?? Auth::user()->username,
+            'type' => 'create',
+            'description' => 'Menambahkan jadwal pertandingan: [' . $request->no . '] ' . $request->nama
+        ]);
+
         return response()->json([
             'message' => 'Jadwal pertandingan berhasil ditambahkan',
             'data' => $jadwal
@@ -48,6 +54,12 @@ class JadwalController extends Controller
 
         $jadwal->update(['nama' => $request->nama]);
 
+        ActivityLog::create([
+            'admin' => Auth::user()->name ?? Auth::user()->username,
+            'type' => 'edit',
+            'description' => 'Mengubah data jadwal: ' . $request->nama
+        ]);
+
         return response()->json(['message' => 'Data jadwal diperbarui']);
     }
 
@@ -56,6 +68,12 @@ class JadwalController extends Controller
         if ($jadwal->created_by !== Auth::id()) {
             return response()->json(['message' => 'Akses ditolak'], 403);
         }
+
+        ActivityLog::create([
+            'admin' => Auth::user()->name ?? Auth::user()->username,
+            'type' => 'delete',
+            'description' => 'Menghapus jadwal pertandingan: ' . $jadwal->nama
+        ]);
 
         $jadwal->delete();
 

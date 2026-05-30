@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Absensi;
+use App\Models\ActivityLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -29,6 +30,12 @@ class AbsensiController extends Controller
                 'created_by' => Auth::id()
             ]
         );
+
+        ActivityLog::create([
+            'admin' => Auth::user()->name ?? Auth::user()->username,
+            'type' => 'edit',
+            'description' => 'Mencatat absensi atlet (ID: ' . $request->atlet_id . ') menjadi: ' . strtoupper($request->status)
+        ]);
 
         return response()->json([
             'message' => 'Absensi berhasil disimpan',

@@ -53,6 +53,7 @@
           <option value="edit">Edit</option>
           <option value="delete">Delete</option>
           <option value="login">Login</option>
+          <option value="logout">Logout</option>
         </select>
 
         <button class="btn-secondary" onclick="filterActivity()">

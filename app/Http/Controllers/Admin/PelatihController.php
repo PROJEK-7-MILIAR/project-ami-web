@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Pelatih;
+use App\Models\ActivityLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -36,6 +37,12 @@ class PelatihController extends Controller
             'created_by' => Auth::id()
         ]);
 
+        ActivityLog::create([
+            'admin' => Auth::user()->name ?? Auth::user()->username,
+            'type' => 'create',
+            'description' => 'Menambahkan pelatih baru: ' . $request->nama
+        ]);
+
         return response()->json(['message' => 'Pelatih berhasil ditambahkan', 'data' => $pelatih]);
     }
 
@@ -47,6 +54,12 @@ class PelatihController extends Controller
 
         $request->validate(['nama' => 'required|string|max:255']);
         $pelatih->update(['nama' => $request->nama]);
+
+        ActivityLog::create([
+            'admin' => Auth::user()->name ?? Auth::user()->username,
+            'type' => 'edit',
+            'description' => 'Mengubah data pelatih: ' . $request->nama
+        ]);
 
         return response()->json(['message' => 'Data pelatih diperbarui']);
     }
@@ -61,6 +74,12 @@ class PelatihController extends Controller
             $path = str_replace('/storage/', '', $pelatih->foto);
             Storage::disk('public')->delete($path);
         }
+
+        ActivityLog::create([
+            'admin' => Auth::user()->name ?? Auth::user()->username,
+            'type' => 'delete',
+            'description' => 'Menghapus data pelatih: ' . $pelatih->nama
+        ]);
 
         $pelatih->delete();
         return response()->json(['message' => 'Data pelatih dihapus']);

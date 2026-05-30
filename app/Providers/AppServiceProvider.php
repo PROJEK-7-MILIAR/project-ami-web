@@ -3,6 +3,10 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Auth\Events\Login;
+use Illuminate\Auth\Events\Logout;
+use App\Models\ActivityLog;
+use Illuminate\Support\Facades\Event;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -19,6 +23,22 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        Event::listen(function (Login $event) {
+            ActivityLog::create([
+                'admin' => $event->user->name ?? $event->user->username,
+                'type' => 'login',
+                'description' => 'User berhasil login ke dalam sistem.'
+            ]);
+        });
+
+        Event::listen(function (Logout $event) {
+            if ($event->user) {
+                ActivityLog::create([
+                    'admin' => $event->user->name ?? $event->user->username,
+                    'type' => 'logout',
+                    'description' => 'User melakukan logout dari sistem.'
+                ]);
+            }
+        });
     }
 }

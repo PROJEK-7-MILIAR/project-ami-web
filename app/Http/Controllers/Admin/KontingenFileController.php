@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\KontingenFile;
+use App\Models\ActivityLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -36,6 +37,12 @@ class KontingenFileController extends Controller
             'created_by' => Auth::id()
         ]);
 
+        ActivityLog::create([
+            'admin' => Auth::user()->name ?? Auth::user()->username,
+            'type' => 'create',
+            'description' => 'Mengupload file ' . $request->type . ': ' . $request->nama
+        ]);
+
         return response()->json([
             'message' => 'File berhasil diupload',
             'data' => $kontingenFile
@@ -52,6 +59,12 @@ class KontingenFileController extends Controller
             $path = str_replace('/storage/', '', $file->file_path);
             Storage::disk('public')->delete($path);
         }
+
+        ActivityLog::create([
+            'admin' => Auth::user()->name ?? Auth::user()->username,
+            'type' => 'delete',
+            'description' => 'Menghapus file ' . $file->type . ': ' . $file->nama
+        ]);
 
         $file->delete();
 
