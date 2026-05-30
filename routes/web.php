@@ -16,6 +16,7 @@ use App\Http\Controllers\Admin\PelatihController;
 use App\Http\Controllers\Admin\AtletController;
 use App\Http\Controllers\Admin\JadwalController;
 use App\Http\Controllers\Admin\KontingenFileController;
+use App\Http\Controllers\Admin\AbsensiController;
 
 Route::get('/', function () {
     return view('index');
@@ -127,6 +128,9 @@ Route::middleware('auth')->group(function () {
         Route::post('/admin/kontingen/{id}/file', [KontingenFileController::class, 'store']);
         Route::delete('/admin/file/{file}', [KontingenFileController::class, 'destroy']);
         Route::get('/admin/file/{file}/download', [KontingenFileController::class, 'download']);
+
+        // Absensi Management
+        Route::post('/admin/kontingen/{id}/absensi', [AbsensiController::class, 'store']);
     });
 
 });
