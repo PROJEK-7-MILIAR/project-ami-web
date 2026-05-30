@@ -7,6 +7,7 @@ use Illuminate\Auth\Events\Login;
 use Illuminate\Auth\Events\Logout;
 use App\Models\ActivityLog;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\URL;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -23,6 +24,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        if (env('APP_ENV') !== 'local' || request()->header('x-forwarded-proto') === 'https') {
+            URL::forceScheme('https');
+        }
+
         Event::listen(function (Login $event) {
             ActivityLog::create([
                 'admin' => $event->user->name ?? $event->user->username,
