@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\Superadmin\DashboardController;
 use App\Http\Controllers\Superadmin\AdminManagemetController;
 use App\Http\Controllers\Superadmin\KontingenController as SuperAdminKontingenController;
 use App\Http\Controllers\Superadmin\MonitoringController;
@@ -39,6 +40,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/superadmin/dashboard', function () {
             return view('superadmin.dashboard');
         })->name('superadmin.dashboard');
+        Route::get('/superadmin/dashboard/stats', [DashboardController::class, 'getStats']);
 
         // Admin User Management
         Route::get('/superadmin/admins-list', [AdminManagemetController::class, 'index'])->name('superadmin.admins.list');
