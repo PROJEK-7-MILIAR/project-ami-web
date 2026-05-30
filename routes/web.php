@@ -8,6 +8,7 @@ use App\Http\Controllers\Superadmin\AdminManagemetController;
 use App\Http\Controllers\Superadmin\KontingenController as SuperAdminKontingenController;
 use App\Http\Controllers\Superadmin\MonitoringController;
 use App\Http\Controllers\Superadmin\ActivityLogController;
+use App\Http\Controllers\Superadmin\ExportController;
 use App\Http\Controllers\Admin\KontingenController;
 use App\Http\Controllers\Admin\KontingenDetailController;
 use App\Http\Controllers\Admin\PelatihController;
@@ -73,6 +74,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/superadmin/export', function () {
             return view('superadmin.export');
         })->name('superadmin.export');
+        Route::get('/superadmin/export/download/{type}/{format}', [ExportController::class, 'download']);
 
         // Settings
         Route::get('/superadmin/settings', function () {
