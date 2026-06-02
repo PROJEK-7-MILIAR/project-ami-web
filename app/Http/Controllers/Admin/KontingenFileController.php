@@ -14,7 +14,7 @@ class KontingenFileController extends Controller
     public function store(Request $request, $kontingenId)
     {
         $request->validate([
-            'type' => 'required|in:program,laporan',
+            'type' => 'required|in:program,laporan,laporantes',
             'nama' => 'required|string|max:255',
             'desc' => 'nullable|string',
             'file' => 'required|file|mimes:pdf,xlsx,xls,csv,txt|max:5120',

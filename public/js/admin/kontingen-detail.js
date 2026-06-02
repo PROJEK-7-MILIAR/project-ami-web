@@ -10,6 +10,7 @@ let programList = [];
 let laporanBulananList = [];
 let jadwalList = [];
 let absensiData = [];
+let laporanTesList = [];
 
 // =========================================================
 // NOTIFICATION & HELPERS
@@ -69,6 +70,7 @@ async function loadDetailData() {
         atletList = data.atlet || [];
         programList = data.program || [];
         laporanBulananList = data.laporanBulanan || [];
+        laporanTesList = data.laporanTes || [];
         jadwalList = data.jadwal || [];
         absensiData = data.absensi || [];
 
@@ -76,6 +78,7 @@ async function loadDetailData() {
         renderAtlet();
         renderProgram();
         renderLaporanBulanan();
+        renderLaporanTes();
         renderJadwal();
 
         if (document.getElementById('absensiDate')?.value) {
@@ -115,6 +118,7 @@ window.openAddAtletModal = () => {
 window.openUploadProgramModal = () => openModal('uploadProgramModal');
 window.openUploadLaporanModal = () => openModal('uploadLaporanModal');
 window.openAddJadwalModal = () => openModal('addJadwalModal');
+window.openUploadLaporanTesModal = () => openModal('uploadLaporanTesModal');
 
 function setupEventListeners() {
     document.getElementById('addPelatihForm')?.addEventListener('submit', addPelatih);
@@ -122,6 +126,7 @@ function setupEventListeners() {
     document.getElementById('uploadProgramForm')?.addEventListener('submit', uploadProgram);
     document.getElementById('uploadLaporanForm')?.addEventListener('submit', uploadLaporanBulanan);
     document.getElementById('addJadwalForm')?.addEventListener('submit', addJadwal);
+    document.getElementById('uploadLaporanTesForm')?.addEventListener('submit', uploadLaporanTes);
 
     document.addEventListener('click', (e) => {
         if (e.target.classList.contains('modal')) e.target.classList.remove('show');
@@ -418,9 +423,11 @@ async function deletePersonData(type, id) {
 // =========================================================
 async function uploadProgram(e) { e.preventDefault(); await submitFileData('program', 'uploadProgramForm', 'uploadProgramModal'); }
 async function uploadLaporanBulanan(e) { e.preventDefault(); await submitFileData('laporan', 'uploadLaporanForm', 'uploadLaporanModal'); }
+async function uploadLaporanTes(e) { e.preventDefault(); await submitFileData('laporantes', 'uploadLaporanTesForm', 'uploadLaporanTesModal'); }
 
 async function submitFileData(type, formId, modalId) {
-    const prefix = type === 'program' ? 'program' : 'laporan';
+    const prefix = type === 'program' ? 'program' : (type === 'laporan' ? 'laporan' : 'laporantes');
+
     const nama = document.getElementById(`${prefix}Nama`).value.trim();
     const desc = document.getElementById(`${prefix}Desc`).value.trim();
     const file = document.getElementById(`${prefix}File`).files[0];
@@ -459,12 +466,14 @@ async function submitFileData(type, formId, modalId) {
 
 function renderProgram() { renderFileList(programList, 'programList', 'program'); }
 function renderLaporanBulanan() { renderFileList(laporanBulananList, 'laporanBulananList', 'laporan'); }
+function renderLaporanTes() { renderFileList(laporanTesList, 'laporanTesList', 'laporantes'); }
 
 function renderFileList(list, containerId, type) {
     const container = document.getElementById(containerId);
     if (!container) return;
 
-    const masterCheckbox = document.getElementById(type === 'program' ? 'selectAllProgram' : 'selectAllLaporan');
+    const checkboxId = type === 'program' ? 'selectAllProgram' : (type === 'laporan' ? 'selectAllLaporan' : 'selectAllLaporanTes');
+    const masterCheckbox = document.getElementById(checkboxId);
     if (masterCheckbox) masterCheckbox.checked = false;
 
     if (list.length === 0) {
@@ -521,10 +530,13 @@ function getFileIcon(type) {
 }
 
 window.toggleSelectAll = function(type) {
-    const masterCheckbox = document.getElementById(type === 'program' ? 'selectAllProgram' : 'selectAllLaporan');
+    const checkboxId = type === 'program' ? 'selectAllProgram' : (type === 'laporan' ? 'selectAllLaporan' : 'selectAllLaporanTes');
+    const masterCheckbox = document.getElementById(checkboxId);
     const checkboxes = document.querySelectorAll(`.checkbox-${type}`);
 
-    checkboxes.forEach(cb => cb.checked = masterCheckbox.checked);
+    if(masterCheckbox) {
+        checkboxes.forEach(cb => cb.checked = masterCheckbox.checked);
+    }
 };
 
 window.downloadSelected = function(type) {

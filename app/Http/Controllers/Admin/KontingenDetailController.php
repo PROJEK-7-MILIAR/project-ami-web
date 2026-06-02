@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Kontingen;
+use App\Models\KontingenFile;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -35,11 +36,17 @@ class KontingenDetailController extends Controller
             'absensis.creator'
         ])->findOrFail($id);
 
+        $laporanTes = KontingenFile::with('creator')
+                        ->where('kontingen_id', $id)
+                        ->where('type', 'laporantes')
+                        ->get();
+
         return response()->json([
             'pelatih' => $kontingen->pelatihs,
             'atlet' => $kontingen->atlets,
             'program' => $kontingen->programs,
             'laporanBulanan' => $kontingen->laporans,
+            'laporanTes' => $laporanTes,
             'jadwal' => $kontingen->jadwals,
             'absensi' => $kontingen->absensis
         ]);

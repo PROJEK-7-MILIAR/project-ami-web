@@ -82,6 +82,10 @@
         <button class="tab-button" onclick="switchTab('laporan-bulanan')">
           📊 Laporan Bulanan
         </button>
+
+        <button class="tab-button" onclick="switchTab('laporan-tes')">
+          📝 Laporan Tes
+        </button>
       </div>
     </section>
 
@@ -205,6 +209,31 @@
 
         <div class="program-list" id="laporanBulananList">
           <div class="empty-state">Belum ada file laporan bulanan</div>
+        </div>
+      </div>
+
+      <div id="laporan-tes" class="tab-content">
+        <div class="section-header">
+          <h3>Laporan Tes</h3>
+
+          <div class="button-group-small" style="align-items: center;">
+            <label style="cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 14px; margin-right: 10px;">
+              <input type="checkbox" id="selectAllLaporanTes" onchange="toggleSelectAll('laporantes')" style="width: 16px; height: 16px;">
+              Pilih Semua
+            </label>
+
+            <button class="btn-primary" onclick="openUploadLaporanTesModal()">
+              📤 Upload File
+            </button>
+
+            <button class="btn-secondary" onclick="downloadSelected('laporantes')">
+              📥 Download Pilihan
+            </button>
+          </div>
+        </div>
+
+        <div class="program-list" id="laporanTesList">
+          <div class="empty-state">Belum ada file laporan tes</div>
         </div>
       </div>
 
@@ -415,6 +444,40 @@
             <button type="submit" class="btn-primary">
               Simpan
             </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL LAPORAN TES -->
+  <div id="uploadLaporanTesModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Upload File Laporan Tes</h3>
+        <button class="close-btn" onclick="closeModal('uploadLaporanTesModal')">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <form id="uploadLaporanTesForm">
+          <div class="form-group">
+            <label for="laporantesFile">Pilih File (PDF, Excel, Spreadsheet)</label>
+            <input type="file" id="laporantesFile" accept=".pdf,.xlsx,.xls,.csv" required>
+          </div>
+
+          <div class="form-group">
+            <label for="laporantesNama">Nama Laporan Tes</label>
+            <input type="text" id="laporantesNama" placeholder="Contoh: Laporan Tes Fisik Tahap 1" required>
+          </div>
+
+          <div class="form-group">
+            <label for="laporantesDesc">Deskripsi (Opsional)</label>
+            <textarea id="laporantesDesc"></textarea>
+          </div>
+
+          <div class="button-group">
+            <button type="button" class="btn-secondary" onclick="closeModal('uploadLaporanTesModal')">Batal</button>
+            <button type="submit" class="btn-primary">Upload</button>
           </div>
         </form>
       </div>
