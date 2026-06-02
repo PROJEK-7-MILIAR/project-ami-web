@@ -10,7 +10,11 @@ class Atlet extends Model
     use HasFactory;
 
     protected $fillable = [
-        'kontingen_id', 'nama', 'usia', 'ttl', 'prestasi', 'foto', 'created_by'
+        'kontingen_id', 'nama', 'usia', 'ttl', 'prestasi', 'foto', 'created_by', 'dynamic_fields',
+    ];
+    
+    protected $casts = [
+        'dynamic_fields' => 'array',
     ];
 
     public function kontingen()

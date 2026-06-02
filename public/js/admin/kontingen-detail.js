@@ -9,7 +9,7 @@ let atletList = [];
 let programList = [];
 let laporanBulananList = [];
 let jadwalList = [];
-let absensiData = []; // Sekarang dari database berupa array
+let absensiData = [];
 
 // =========================================================
 // NOTIFICATION & HELPERS
@@ -100,8 +100,18 @@ window.switchTab = function(tabName) {
 
 window.openModal = function(modalId) { document.getElementById(modalId)?.classList.add('show'); };
 window.closeModal = function(modalId) { document.getElementById(modalId)?.classList.remove('show'); };
-window.openAddPelatihModal = () => openModal('addPelatihModal');
-window.openAddAtletModal = () => openModal('addAtletModal');
+window.openAddPelatihModal = () => {
+    document.getElementById('addPelatihForm').reset();
+    document.getElementById('dynamicFieldsContainerPelatih').innerHTML = '';
+    addDynamicField('dynamicFieldsContainerPelatih');
+    openModal('addPelatihModal');
+};
+window.openAddAtletModal = () => {
+    document.getElementById('addAtletForm').reset();
+    document.getElementById('dynamicFieldsContainerAtlet').innerHTML = '';
+    addDynamicField('dynamicFieldsContainerAtlet');
+    openModal('addAtletModal');
+};
 window.openUploadProgramModal = () => openModal('uploadProgramModal');
 window.openUploadLaporanModal = () => openModal('uploadLaporanModal');
 window.openAddJadwalModal = () => openModal('addJadwalModal');
@@ -127,11 +137,15 @@ function setTodayDate() {
 // CARD RENDERER (Reusable for Pelatih & Atlet)
 // =========================================================
 function createDataCard(data, type) {
+    window.personDataStore = window.personDataStore || {};
+    window.personDataStore[`${type}_${data.id}`] = data;
+
     const card = document.createElement('div');
     card.className = 'data-card';
+    card.style.display = 'flex';
+    card.style.flexDirection = 'column';
+    card.style.height = '100%';
 
-    const usia = data.usia ? `Usia: ${escapeHTML(data.usia)} tahun` : '';
-    const ttl = data.ttl ? `TTL: ${formatDate(data.ttl)}` : '';
     const owner = isDataOwner(data);
     const foto = data.foto || 'https://via.placeholder.com/280x200?text=No+Photo';
     const creatorName = data.creator?.name || '-';
@@ -139,25 +153,120 @@ function createDataCard(data, type) {
     const editFunction = type === 'pelatih' ? 'editPelatih' : 'editAtlet';
     const deleteFunction = type === 'pelatih' ? 'deletePelatih' : 'deleteAtlet';
 
+    let listHtml = '';
+
+    if (data.usia) listHtml += `<div style="display: flex; justify-content: space-between; font-size: 13px; border-bottom: 1px solid #f1f5f9; padding-bottom: 6px;"><span style="color: #64748b; font-weight: 600;">Usia</span><span style="color: #1e3a8a; font-weight: 800;">${escapeHTML(data.usia)} Tahun</span></div>`;
+    if (data.ttl) listHtml += `<div style="display: flex; justify-content: space-between; font-size: 13px; border-bottom: 1px solid #f1f5f9; padding-bottom: 6px;"><span style="color: #64748b; font-weight: 600;">TTL</span><span style="color: #1e3a8a; font-weight: 800;">${formatDate(data.ttl)}</span></div>`;
+    if (data.prestasi) listHtml += `<div style="display: flex; flex-direction: column; font-size: 13px; border-bottom: 1px solid #f1f5f9; padding-bottom: 6px;"><span style="color: #64748b; font-weight: 600;">Prestasi</span><span style="color: #1e3a8a; font-weight: 800; margin-top: 4px;">${escapeHTML(data.prestasi)}</span></div>`;
+
+    let fields = data.dynamic_fields;
+    if (typeof fields === 'string') {
+        try { fields = JSON.parse(fields); } catch(e) { fields = []; }
+    }
+
+    if (fields && Array.isArray(fields)) {
+        fields.forEach((field, index) => {
+            if (index === 0 && field.value === data.nama) return;
+            listHtml += `
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; font-size: 13px; border-bottom: 1px solid #f1f5f9; padding-bottom: 6px;">
+                    <span style="color: #64748b; font-weight: 600; flex: 1;">${escapeHTML(field.label)}</span>
+                    <span style="color: #1e3a8a; font-weight: 800; text-align: right; flex: 2; word-break: break-word;">${escapeHTML(field.value)}</span>
+                </div>
+            `;
+        });
+    }
+
     card.innerHTML = `
-        <img src="${foto}" alt="${escapeHTML(data.nama)}">
-        <div class="data-card-content">
-            <h4>${escapeHTML(data.nama)}</h4>
-            ${usia ? `<p>${usia}</p>` : ''}
-            ${ttl ? `<p>${ttl}</p>` : ''}
-            ${data.prestasi ? `<p><strong>Prestasi:</strong> ${escapeHTML(data.prestasi)}</p>` : ''}
-            <p style="font-size: 12px; color: #777; margin-top: 8px;">Dibuat oleh: ${escapeHTML(creatorName)}</p>
-            <div class="data-card-actions">
-                ${owner
-                    ? `<button onclick="${editFunction}(${data.id})">✎ Edit</button>
-                       <button class="delete" onclick="${deleteFunction}(${data.id})">🗑 Hapus</button>`
-                    : `<button disabled style="opacity: 0.5; cursor: not-allowed;">🔒 Terkunci</button>`
-                }
+        <img src="${foto}" alt="${escapeHTML(data.nama)}" style="width: 100%; height: 190px; object-fit: cover;">
+        <div class="data-card-content" style="padding: 20px; display: flex; flex-direction: column; flex-grow: 1;">
+            <h4 style="font-size: 20px; margin-bottom: 4px; color: #1e3a8a; font-weight: 900;">${escapeHTML(data.nama)}</h4>
+            <div class="card-scroll-area" style="flex-grow: 1; overflow-y: auto; max-height: 180px; margin-top: 16px; display: flex; flex-direction: column; gap: 8px; padding-right: 6px;">
+                ${listHtml}
+            </div>
+            <div style="margin-top: auto; padding-top: 12px;">
+                <p style="font-size: 11px; color: #94a3b8; border-top: 1px dashed #e2e8f0; padding-top: 12px;">
+                    Dibuat oleh: ${escapeHTML(creatorName)}
+                </p>
+                <div class="data-card-actions" style="margin-top: 14px; display: flex; gap: 10px;">
+                    ${owner
+                        ? `<button onclick="${editFunction}(${data.id})" style="flex: 1; padding: 8px; font-size: 12px; border-radius: 10px; border: 1px solid #cbd5e1; background: #fff; cursor: pointer; transition: all 0.2s; font-weight: 700;">✎ Edit</button>
+                           <button class="delete" onclick="${deleteFunction}(${data.id})" style="flex: 1; padding: 8px; font-size: 12px; border-radius: 10px; border: 1px solid #fecaca; background: #fef2f2; color: #ef4444; cursor: pointer; transition: all 0.2s; font-weight: 700;">🗑 Hapus</button>`
+                        : `<button disabled style="flex: 1; padding: 8px; font-size: 12px; border-radius: 10px; opacity: 0.5; cursor: not-allowed; font-weight: 700;">🔒 Terkunci</button>`
+                    }
+                </div>
             </div>
         </div>
     `;
     return card;
 }
+
+window.openEditModal = function(type, id) {
+    const data = window.personDataStore[`${type}_${id}`];
+    if (!data) return notify('Data tidak ditemukan', 'error');
+
+    const formId = `edit${type.charAt(0).toUpperCase() + type.slice(1)}Form`;
+    const modalId = `edit${type.charAt(0).toUpperCase() + type.slice(1)}Modal`;
+    const containerId = `editDynamicFieldsContainer${type.charAt(0).toUpperCase() + type.slice(1)}`;
+
+    document.getElementById(formId).reset();
+    document.getElementById(`${type}EditId`).value = data.id;
+
+    const container = document.getElementById(containerId);
+    container.innerHTML = '';
+
+    let fields = data.dynamic_fields;
+    if (typeof fields === 'string') {
+        try { fields = JSON.parse(fields); } catch(e) { fields = []; }
+    }
+
+    if (fields && Array.isArray(fields) && fields.length > 0) {
+        fields.forEach(f => addDynamicField(containerId, f.label, f.value));
+    } else {
+        addDynamicField(containerId, 'Nama Utama', data.nama);
+    }
+
+    openModal(modalId);
+};
+
+window.editPelatih = (id) => openEditModal('pelatih', id);
+window.editAtlet = (id) => openEditModal('atlet', id);
+
+window.deletePelatih = async (id) => await deletePersonData('pelatih', id);
+window.deleteAtlet = async (id) => await deletePersonData('atlet', id);
+
+window.addDynamicField = function(containerId, initialLabel = '', initialValue = '') {
+    const container = document.getElementById(containerId);
+    const row = document.createElement('div');
+    row.className = 'dynamic-field-row';
+    row.style.display = 'flex';
+    row.style.gap = '14px';
+    row.style.marginBottom = '14px';
+    row.style.alignItems = 'flex-start';
+
+    row.innerHTML = `
+        <div class="form-group" style="flex: 1; margin-bottom: 0;">
+            <input type="text" class="field-label" placeholder="Judul" value="${escapeHTML(initialLabel)}" required>
+        </div>
+        <div class="form-group" style="flex: 2; margin-bottom: 0;">
+            <textarea class="field-value" placeholder="Isi data..." required
+                rows="1"
+                style="min-height: 44px; height: 44px; resize: none; overflow: hidden; line-height: 1.5; padding-top: 11px;"
+                oninput="this.style.height = 'auto'; this.style.height = this.scrollHeight + 'px';">${escapeHTML(initialValue)}</textarea>
+        </div>
+        <button type="button" class="btn-danger"
+            onclick="if(this.parentElement.parentElement.querySelectorAll('.dynamic-field-row').length > 1) this.parentElement.remove(); else notify('Minimal 1 baris wajib diisi!', 'warning');"
+            style="flex: 0 0 auto; height: 44px; width: 44px; padding: 0; display: flex; align-items: center; justify-content: center; border-radius: 14px; font-size: 16px; transition: all 0.2s;" title="Hapus Baris">🗑️</button>
+    `;
+    container.appendChild(row);
+
+    if(initialValue) {
+        setTimeout(() => {
+            const textarea = row.querySelector('.field-value');
+            textarea.style.height = 'auto';
+            textarea.style.height = textarea.scrollHeight + 'px';
+        }, 10);
+    }
+};
 
 // =========================================================
 // PELATIH
@@ -166,9 +275,6 @@ async function addPelatih(e) {
     e.preventDefault();
     await submitPersonData('pelatih', 'addPelatihForm', 'addPelatihModal');
 }
-
-window.editPelatih = async (id) => await editPersonData('pelatih', id, pelatihList);
-window.deletePelatih = async (id) => await deletePersonData('pelatih', id);
 
 function renderPelatih() {
     const grid = document.getElementById('pelatihGrid');
@@ -185,9 +291,6 @@ async function addAtlet(e) {
     await submitPersonData('atlet', 'addAtletForm', 'addAtletModal');
 }
 
-window.editAtlet = async (id) => await editPersonData('atlet', id, atletList);
-window.deleteAtlet = async (id) => await deletePersonData('atlet', id);
-
 function renderAtlet() {
     const grid = document.getElementById('atletGrid');
     if (!grid) return;
@@ -199,24 +302,30 @@ function renderAtlet() {
 // LOGIC REUSABLE UNTUK PELATIH & ATLET
 // =========================================================
 async function submitPersonData(type, formId, modalId) {
-    const nama = document.getElementById(`${type}Nama`).value.trim();
-    const usia = document.getElementById(`${type}Usia`).value.trim();
-    const ttl = document.getElementById(`${type}TTL`).value;
-    const prestasi = document.getElementById(`${type}Prestasi`).value.trim();
     const foto = document.getElementById(`${type}Foto`).files[0];
-
-    if (!nama) return notify('Nama wajib diisi!', 'warning');
-
     const formData = new FormData();
-    formData.append('nama', nama);
-    if (usia) formData.append('usia', usia);
-    if (ttl) formData.append('ttl', ttl);
-    if (prestasi) formData.append('prestasi', prestasi);
+    let namaUtama = '';
+    const dynamicFields = [];
+
+    document.querySelectorAll(`#${formId} .dynamic-field-row`).forEach((row, index) => {
+        const label = row.querySelector('.field-label').value.trim();
+        const val = row.querySelector('.field-value').value.trim();
+
+        if (label && val) {
+            dynamicFields.push({ label: label, value: val });
+            if (index === 0) namaUtama = val;
+        }
+    });
+
+    if (dynamicFields.length === 0) return notify('Isi minimal 1 baris!', 'warning');
+
+    formData.append('nama', namaUtama);
+    formData.append('dynamic_fields', JSON.stringify(dynamicFields));
     if (foto) formData.append('foto', foto);
 
     const btn = document.querySelector(`#${formId} button[type="submit"]`);
     const oldText = btn.innerHTML;
-    btn.disabled = true; btn.innerHTML = '⏳...';
+    btn.disabled = true; btn.innerHTML = '⏳ Menyimpan...';
 
     try {
         const response = await fetch(`/admin/kontingen/${KONTINGEN_ID}/${type}`, {
@@ -233,29 +342,59 @@ async function submitPersonData(type, formId, modalId) {
         await loadDetailData();
     } catch (error) {
         notify('Gagal menyimpan data.', 'error');
+        console.error(error);
     } finally {
         btn.disabled = false; btn.innerHTML = oldText;
     }
 }
 
-async function editPersonData(type, id, list) {
-    const person = list.find(item => item.id === id);
-    if (!person) return;
+window.submitEditPersonData = async function(type, formId, modalId) {
+    const form = document.getElementById(formId);
+    const id = document.getElementById(`${type}EditId`).value;
+    const foto = document.getElementById(`edit${type.charAt(0).toUpperCase() + type.slice(1)}Foto`).files[0];
 
-    const newNama = prompt(`Ubah nama ${type}:`, person.nama);
-    if (!newNama || newNama.trim() === '') return;
+    const formData = new FormData();
+    formData.append('_method', 'PUT');
+
+    let namaUtama = '';
+    const dynamicFields = [];
+
+    document.querySelectorAll(`#${formId} .dynamic-field-row`).forEach((row, index) => {
+        const label = row.querySelector('.field-label').value.trim();
+        const val = row.querySelector('.field-value').value.trim();
+        if (label && val) {
+            dynamicFields.push({ label: label, value: val });
+            if (index === 0) namaUtama = val;
+        }
+    });
+
+    if (dynamicFields.length === 0) return notify('Isi minimal 1 baris!', 'warning');
+
+    formData.append('nama', namaUtama);
+    formData.append('dynamic_fields', JSON.stringify(dynamicFields));
+    if (foto) formData.append('foto', foto);
+
+    const btn = form.querySelector('button[type="submit"]');
+    const oldText = btn.innerHTML;
+    btn.disabled = true; btn.innerHTML = '⏳ Menyimpan...';
 
     try {
-        const res = await fetch(`/admin/${type}/${id}`, {
-            method: 'PUT',
-            headers: { 'Accept': 'application/json', 'Content-Type': 'application/json', 'X-CSRF-TOKEN': CSRF_TOKEN },
-            body: JSON.stringify({ nama: newNama.trim() })
+        const response = await fetch(`/admin/${type}/${id}`, {
+            method: 'POST',
+            headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': window.csrfToken },
+            body: formData
         });
-        if (!res.ok) throw new Error();
-        notify(`Data ${type} diperbarui.`, 'success');
+
+        if (!response.ok) throw new Error(await response.text());
+
+        closeModal(modalId);
+        notify(`Data ${type} berhasil diperbarui.`, 'success');
         await loadDetailData();
-    } catch (e) {
+    } catch (error) {
         notify('Gagal memperbarui data.', 'error');
+        console.error(error);
+    } finally {
+        btn.disabled = false; btn.innerHTML = oldText;
     }
 }
 
@@ -338,9 +477,7 @@ function renderFileList(list, containerId, type) {
         const icon = getFileIcon(file.file_type || file.file_name);
         return `
             <div class="program-item" style="display: flex; align-items: flex-start; gap: 15px;">
-
                 <input type="checkbox" class="checkbox-${type}" value="${file.id}" style="width: 18px; height: 18px; cursor: pointer; margin-top: 14px;">
-
                 <div style="display: flex; align-items: flex-start; flex: 1;">
                     <div class="program-item-icon">${icon}</div>
                     <div class="program-info">
@@ -403,9 +540,7 @@ window.downloadSelected = function(type) {
         setTimeout(() => {
             const iframe = document.createElement('iframe');
             iframe.style.display = 'none';
-
             iframe.src = `/admin/file/${cb.value}/download`;
-
             document.body.appendChild(iframe);
 
             setTimeout(() => {
@@ -545,7 +680,7 @@ function renderAbsensiTable(date) {
 
     atletList.forEach((atlet, index) => {
         const record = absensiData.find(a => a.atlet_id === atlet.id && a.tanggal === date);
-        const status = record?.status || 'hadir'; 
+        const status = record?.status || 'hadir';
         const owner = !record || record.created_by === window.authUser?.id;
 
         html += `

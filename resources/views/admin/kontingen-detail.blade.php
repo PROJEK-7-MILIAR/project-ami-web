@@ -124,11 +124,11 @@
             </label>
 
             <button class="btn-primary" onclick="openUploadProgramModal()">
-              📤 Upload File
+               Diload File
             </button>
 
             <button class="btn-secondary" onclick="downloadSelected('program')">
-              📥 Download Pilihan
+               Download Pilihan
             </button>
           </div>
         </div>
@@ -194,11 +194,11 @@
             </label>
 
             <button class="btn-primary" onclick="openUploadLaporanModal()">
-              📤 Upload File
+               Upload File
             </button>
 
             <button class="btn-secondary" onclick="downloadSelected('laporan')">
-              📥 Download Pilihan
+               Download Pilihan
             </button>
           </div>
         </div>
@@ -211,6 +211,7 @@
     </section>
   </main>
 
+  <!-- MODAL PELATIH -->
   <div id="addPelatihModal" class="modal">
     <div class="modal-content">
       <div class="modal-header">
@@ -219,50 +220,31 @@
       </div>
 
       <div class="modal-body">
-        <form id="addPelatihForm">
+       <form id="addPelatihForm">
           <div class="form-group">
             <label for="pelatihFoto">Foto Pelatih</label>
             <input type="file" id="pelatihFoto" accept="image/*" required>
           </div>
 
-          <div class="form-row">
-            <div class="form-group">
-              <label for="pelatihNama">Nama Lengkap</label>
-              <input type="text" id="pelatihNama" required>
-            </div>
+          <hr style="margin: 20px 0; border-color: #e2e8f0;">
 
-            <div class="form-group">
-              <label for="pelatihUsia">Usia</label>
-              <input type="number" id="pelatihUsia" min="1">
-            </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+              <label style="margin: 0; color: #1b3061; font-weight: 800; font-size: 13px;">Isi Form</label>
+              <button type="button" class="btn-secondary" onclick="addDynamicField('dynamicFieldsContainerPelatih')" style="padding: 4px 10px; font-size: 11px;">+ Tambah Baris</button>
           </div>
 
-          <div class="form-row">
-            <div class="form-group">
-              <label for="pelatihTTL">Tanggal Lahir</label>
-              <input type="date" id="pelatihTTL">
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label for="pelatihPrestasi">Riwayat Prestasi (Opsional)</label>
-            <textarea id="pelatihPrestasi" placeholder="Contoh: Juara Nasional 2020..."></textarea>
-          </div>
+          <div id="dynamicFieldsContainerPelatih"></div>
 
           <div class="button-group">
-            <button type="button" class="btn-secondary" onclick="closeModal('addPelatihModal')">
-              Batal
-            </button>
-
-            <button type="submit" class="btn-primary">
-              Simpan
-            </button>
+            <button type="button" class="btn-secondary" onclick="closeModal('addPelatihModal')">Batal</button>
+            <button type="submit" class="btn-primary">Simpan</button>
           </div>
         </form>
       </div>
     </div>
   </div>
 
+  <!-- MODAL ATLET -->
   <div id="addAtletModal" class="modal">
     <div class="modal-content">
       <div class="modal-header">
@@ -271,50 +253,31 @@
       </div>
 
       <div class="modal-body">
-        <form id="addAtletForm">
+       <form id="addAtletForm">
           <div class="form-group">
             <label for="atletFoto">Foto Atlet</label>
             <input type="file" id="atletFoto" accept="image/*" required>
           </div>
 
-          <div class="form-row">
-            <div class="form-group">
-              <label for="atletNama">Nama Lengkap</label>
-              <input type="text" id="atletNama" required>
-            </div>
+          <hr style="margin: 20px 0; border-color: #e2e8f0;">
 
-            <div class="form-group">
-              <label for="atletUsia">Usia</label>
-              <input type="number" id="atletUsia" min="1">
-            </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+              <label style="margin: 0; color: #1b3061; font-weight: 800; font-size: 13px;">Isian Form (Bebas)</label>
+              <button type="button" class="btn-secondary" onclick="addDynamicField('dynamicFieldsContainerAtlet')" style="padding: 4px 10px; font-size: 11px;">+ Tambah Baris</button>
           </div>
 
-          <div class="form-row">
-            <div class="form-group">
-              <label for="atletTTL">Tanggal Lahir</label>
-              <input type="date" id="atletTTL">
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label for="atletPrestasi">Riwayat Prestasi (Opsional)</label>
-            <textarea id="atletPrestasi" placeholder="Contoh: Juara Kota 2023..."></textarea>
-          </div>
+          <div id="dynamicFieldsContainerAtlet"></div>
 
           <div class="button-group">
-            <button type="button" class="btn-secondary" onclick="closeModal('addAtletModal')">
-              Batal
-            </button>
-
-            <button type="submit" class="btn-primary">
-              Simpan
-            </button>
+            <button type="button" class="btn-secondary" onclick="closeModal('addAtletModal')">Batal</button>
+            <button type="submit" class="btn-primary">Simpan</button>
           </div>
         </form>
       </div>
     </div>
   </div>
 
+  <!-- MODAL PROGRAM LATIHAN -->
   <div id="uploadProgramModal" class="modal">
     <div class="modal-content">
       <div class="modal-header">
@@ -359,6 +322,7 @@
     </div>
   </div>
 
+  <!-- MODAL LAPORAN BULANAN -->
   <div id="uploadLaporanModal" class="modal">
     <div class="modal-content">
       <div class="modal-header">
@@ -403,6 +367,7 @@
     </div>
   </div>
 
+  <!-- MODAL JADWAL -->
   <div id="addJadwalModal" class="modal">
     <div class="modal-content">
       <div class="modal-header">
@@ -450,6 +415,63 @@
             <button type="submit" class="btn-primary">
               Simpan
             </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div id="editPelatihModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Edit Data Pelatih</h3>
+        <button class="close-btn" onclick="closeModal('editPelatihModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="editPelatihForm" onsubmit="event.preventDefault(); submitEditPersonData('pelatih', 'editPelatihForm', 'editPelatihModal');">
+          <input type="hidden" id="pelatihEditId"> <div class="form-group">
+            <label>Foto Baru</label>
+            <input type="file" id="editPelatihFoto" accept="image/*">
+          </div>
+          <hr style="margin: 20px 0; border-color: #e2e8f0;">
+
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+              <label style="margin: 0; color: #1b3061; font-weight: 800; font-size: 13px;">Isian Form</label>
+              <button type="button" class="btn-secondary" onclick="addDynamicField('editDynamicFieldsContainerPelatih')" style="padding: 4px 10px; font-size: 11px;">+ Tambah Baris</button>
+          </div>
+          <div id="editDynamicFieldsContainerPelatih"></div>
+          <div class="button-group">
+            <button type="button" class="btn-secondary" onclick="closeModal('editPelatihModal')">Batal</button>
+            <button type="submit" class="btn-primary">Update Data</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div id="editAtletModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Edit Data Atlet</h3>
+        <button class="close-btn" onclick="closeModal('editAtletModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="editAtletForm" onsubmit="event.preventDefault(); submitEditPersonData('atlet', 'editAtletForm', 'editAtletModal');">
+          <input type="hidden" id="atletEditId">
+          <div class="form-group">
+            <label>Foto Baru (Biarkan kosong jika tidak diganti)</label>
+            <input type="file" id="editAtletFoto" accept="image/*">
+          </div>
+          <hr style="margin: 20px 0; border-color: #e2e8f0;">
+
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+              <label style="margin: 0; color: #1b3061; font-weight: 800; font-size: 13px;">Isian Form (Bebas)</label>
+              <button type="button" class="btn-secondary" onclick="addDynamicField('editDynamicFieldsContainerAtlet')" style="padding: 4px 10px; font-size: 11px;">+ Tambah Baris</button>
+          </div>
+          <div id="editDynamicFieldsContainerAtlet"></div>
+          <div class="button-group">
+            <button type="button" class="btn-secondary" onclick="closeModal('editAtletModal')">Batal</button>
+            <button type="submit" class="btn-primary">Update Data</button>
           </div>
         </form>
       </div>

@@ -15,9 +15,6 @@ class AtletController extends Controller
     {
         $request->validate([
             'nama' => 'required|string|max:255',
-            'usia' => 'nullable|integer',
-            'ttl' => 'nullable|date',
-            'prestasi' => 'nullable|string',
             'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ]);
 
@@ -27,17 +24,17 @@ class AtletController extends Controller
             $fotoPath = '/storage/' . $path;
         }
 
+        $dynamicFields = $request->has('dynamic_fields') ? json_decode($request->dynamic_fields, true) : [];
+
         $atlet = Atlet::create([
             'kontingen_id' => $kontingenId,
             'nama' => $request->nama,
-            'usia' => $request->usia,
-            'ttl' => $request->ttl,
-            'prestasi' => $request->prestasi,
             'foto' => $fotoPath,
+            'dynamic_fields' => $dynamicFields,
             'created_by' => Auth::id()
         ]);
 
-        ActivityLog::create([
+        \App\Models\ActivityLog::create([
             'admin' => Auth::user()->name ?? Auth::user()->username,
             'type' => 'create',
             'description' => 'Menambahkan atlet baru: ' . $request->nama
@@ -49,22 +46,43 @@ class AtletController extends Controller
         ]);
     }
 
-    public function update(Request $request, Atlet $atlet)
+    public function update(Request $request, $id)
     {
-        if ($atlet->created_by !== Auth::id()) {
+        $person = \App\Models\Atlet::findOrFail($id);
+
+        if ($person->created_by !== Auth::id()) {
             return response()->json(['message' => 'Akses ditolak'], 403);
         }
 
-        $request->validate(['nama' => 'required|string|max:255']);
-        $atlet->update(['nama' => $request->nama]);
-
-        ActivityLog::create([
-            'admin' => Auth::user()->name ?? Auth::user()->username,
-            'type' => 'edit',
-            'description' => 'Mengubah data atlet: ' . $request->nama
+        $request->validate([
+            'nama' => 'required|string|max:255',
+            'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ]);
 
-        return response()->json(['message' => 'Data atlet diperbarui']);
+        if ($request->hasFile('foto')) {
+            if ($person->foto && strpos($person->foto, '/storage/') === 0) {
+                $oldPath = str_replace('/storage/', '', $person->foto);
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($oldPath);
+            }
+            $path = $request->file('foto')->store('atlet_fotos', 'public');
+            $person->foto = '/storage/' . $path;
+        }
+
+        $dynamicFields = $request->has('dynamic_fields') ? json_decode($request->dynamic_fields, true) : $person->dynamic_fields;
+
+        $person->update([
+            'nama' => $request->nama,
+            'dynamic_fields' => $dynamicFields,
+            'foto' => $person->foto,
+        ]);
+
+        \App\Models\ActivityLog::create([
+            'admin' => Auth::user()->name ?? Auth::user()->username,
+            'type' => 'edit',
+            'description' => 'Mengubah data: ' . $request->nama
+        ]);
+
+        return response()->json(['message' => 'Data diperbarui']);
     }
 
     public function destroy(Atlet $atlet)
