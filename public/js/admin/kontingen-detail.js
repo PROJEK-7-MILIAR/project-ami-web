@@ -497,7 +497,14 @@ function renderFileList(list, containerId, type) {
                         <p style="font-size: 12px; color: #777; margin-top: 8px;">Dibuat oleh: ${escapeHTML(file.creator?.name || '-')}</p>
                     </div>
                 </div>
-                <div class="program-actions" style="margin-top: 5px;">
+
+                <div class="program-actions" style="margin-top: 5px; display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end;">
+
+                    <button onclick="previewFile('${escapeHTML(file.file_path)}', '${escapeHTML(file.file_type)}', '${escapeHTML(file.nama)}', ${file.id})"
+                            style="background: #f0f9ff; color: #0284c7; border: 1px solid #bae6fd; font-weight: 600;">
+                        👁️ Lihat
+                    </button>
+
                     <button onclick="window.location.href='/admin/file/${file.id}/download'">📥 Download</button>
                     ${owner
                         ? `<button class="delete" onclick="deleteFile(${file.id})">🗑 Hapus</button>`
@@ -507,6 +514,43 @@ function renderFileList(list, containerId, type) {
         `;
     }).join('');
 }
+
+window.previewFile = function(url, ext, name, id) {
+    const extension = String(ext).toLowerCase();
+
+    const title = document.getElementById('previewTitle');
+    const img = document.getElementById('previewImage');
+    const iframe = document.getElementById('previewIframe');
+    const fallback = document.getElementById('previewFallback');
+    const extSpan = document.getElementById('previewExt');
+    const dlBtn = document.getElementById('previewDownloadBtn');
+
+    title.innerText = 'Preview: ' + name;
+    img.style.display = 'none';
+    iframe.style.display = 'none';
+    fallback.style.display = 'none';
+    img.src = '';
+    iframe.src = '';
+
+    if (['jpg', 'jpeg', 'png', 'webp', 'gif'].includes(extension)) {
+        img.src = url;
+        img.style.display = 'block';
+    }
+    else if (extension === 'pdf') {
+        iframe.src = url;
+        iframe.style.display = 'block';
+    }
+    else {
+        extSpan.innerText = extension;
+        dlBtn.onclick = () => {
+            window.location.href = `/admin/file/${id}/download`;
+            closeModal('previewModal');
+        };
+        fallback.style.display = 'block';
+    }
+
+    openModal('previewModal');
+};
 
 window.deleteFile = async function(id) {
     if (!await askConfirm('Hapus file ini permanen?')) return;
