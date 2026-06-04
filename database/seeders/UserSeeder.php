@@ -20,6 +20,7 @@ class UserSeeder extends Seeder
                 'email' => 'superadmin@mail.com',
                 'password' => 'super123',
                 'role' => UserRole::SUPERADMIN->value,
+                'email_verified_at' => now(),
             ],
         );
 
@@ -30,6 +31,7 @@ class UserSeeder extends Seeder
                 'email' => 'admin@mail.com',
                 'password' => '12345',
                 'role' => UserRole::ADMIN->value,
+                'email_verified_at' => now(),
             ],
         );
     }
