@@ -21,6 +21,7 @@
 
   <link rel="stylesheet" href="/css/admin/home-styles.css">
   <link rel="stylesheet" href="/css/alert-style.css">
+  <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
   <style>
     .user-info-link {
         text-decoration: none;

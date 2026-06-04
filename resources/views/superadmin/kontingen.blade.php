@@ -10,6 +10,7 @@
   <link rel="stylesheet" href="/css/superadmin/kontingen.css">
   <link rel="stylesheet" href="/css/superadmin/common.css">
   <link rel="stylesheet" href="/css/alert-style.css">
+  <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
 </head>
 
 <body>

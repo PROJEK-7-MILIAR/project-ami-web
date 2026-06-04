@@ -7,6 +7,7 @@
   <title>Portal Atlet Nasional</title>
 
   <link rel="stylesheet" href="{{ asset('css/style.css') }}">
+  <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
 </head>
 
 <body>
