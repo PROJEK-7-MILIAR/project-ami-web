@@ -144,7 +144,7 @@
             </label>
 
             <button class="btn-primary" onclick="openUploadProgramModal()">
-               Diload File
+               Upload File
             </button>
 
             <button class="btn-secondary" onclick="downloadSelected('program')">
