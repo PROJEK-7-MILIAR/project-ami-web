@@ -753,7 +753,7 @@ function renderAbsensiTable(date) {
 
     atletList.forEach((atlet, index) => {
         const record = absensiData.find(a => a.atlet_id === atlet.id && a.tanggal === date);
-        const status = record?.status || 'hadir';
+        const status = record?.status || 'belum_absen';
         const owner = !record || record.created_by === window.authUser?.id;
 
         html += `
@@ -762,14 +762,21 @@ function renderAbsensiTable(date) {
                 <td>${escapeHTML(atlet.nama)}</td>
                 <td>
                     <select class="absensi-status-select" onchange="updateAbsensi('${date}', ${atlet.id}, this.value)" ${owner ? '' : 'disabled'}>
+                        <option value="belum_absen" ${status === 'belum_absen' ? 'selected' : ''} disabled hidden>Belum Absen</option>
+
                         <option value="hadir" ${status === 'hadir' ? 'selected' : ''}>Hadir</option>
                         <option value="absen" ${status === 'absen' ? 'selected' : ''}>Absen</option>
                         <option value="izin" ${status === 'izin' ? 'selected' : ''}>Izin</option>
                     </select>
                 </td>
-                <td><span class="status-${status}">${String(status).toUpperCase()}</span></td>
                 <td>
-                    ${escapeHTML(record?.creator?.name || '-')}
+                    ${status === 'belum_absen'
+                        ? `<span style="background: #f1f5f9; color: #64748b; padding: 4px 8px; border-radius: 6px; font-weight: 700; font-size: 11px; letter-spacing: 0.5px;">BELUM ABSEN</span>`
+                        : `<span class="status-${status}">${String(status).toUpperCase()}</span>`
+                    }
+                </td>
+                <td>
+                    ${record ? escapeHTML(record.creator?.name || '-') : '-'}
                     ${owner ? '' : '<br><small>🔒 Terkunci</small>'}
                 </td>
             </tr>
