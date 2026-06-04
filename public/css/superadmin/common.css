@@ -164,6 +164,18 @@ body {
   box-shadow: inset 4px 0 0 #facc15;
 }
 
+.user-info-link {
+        text-decoration: none;
+        color: inherit;
+        cursor: pointer;
+        padding: 5px 10px;
+        border-radius: 6px;
+        transition: background-color 0.2s;
+    }
+    .user-info-link:hover {
+        background-color: rgba(0,0,0,0.05);
+    }
+
 /* =========================
    MAIN CONTENT
 ========================= */

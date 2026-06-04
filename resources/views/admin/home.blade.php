@@ -21,6 +21,19 @@
 
   <link rel="stylesheet" href="/css/admin/home-styles.css">
   <link rel="stylesheet" href="/css/alert-style.css">
+  <style>
+    .user-info-link {
+        text-decoration: none;
+        color: inherit;
+        cursor: pointer;
+        padding: 5px 10px;
+        border-radius: 6px;
+        transition: background-color 0.2s;
+    }
+    .user-info-link:hover {
+        background-color: rgba(0,0,0,0.05);
+    }
+  </style>
 </head>
 
 <body>
@@ -33,7 +46,9 @@
       </div>
 
       <div class="header-actions">
-        <span class="user-info" id="userInfo">{{ $authUser->name }}</span>
+        <a href="{{ route('profile.edit') }}" class="user-info user-info-link" id="userInfo" title="Pengaturan Profil">
+          👤 {{ $authUser->name }}
+        </a>
         <button class="logout-btn" onclick="logout()">Logout</button>
       </div>
     </div>

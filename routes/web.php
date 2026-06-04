@@ -19,6 +19,7 @@ use App\Http\Controllers\Admin\AtletController;
 use App\Http\Controllers\Admin\JadwalController;
 use App\Http\Controllers\Admin\KontingenFileController;
 use App\Http\Controllers\Admin\AbsensiController;
+use App\Http\Controllers\ProfileController;
 
 Route::get('/', function () {
     return view('index');
@@ -49,6 +50,8 @@ Route::post('/email/verification-notification', function (Request $request) {
 Route::middleware('auth')->group(function () {
 
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
 
     // =========================================================
     // SUPERADMIN ROUTES

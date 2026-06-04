@@ -21,7 +21,9 @@
       </div>
 
       <div class="header-actions">
-        <span class="user-info" id="userInfo">Super Admin</span>
+        <a href="{{ route('profile.edit') }}" class="user-info user-info-link" id="userInfo" title="Pengaturan Profil">
+          👤 {{ $authUser->name ?? 'Super Admin' }}
+        </a>
         <button class="logout-btn" id="logoutBtn">Logout</button>
       </div>
     </div>
