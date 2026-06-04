@@ -1,0 +1,221 @@
+.kontingen-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.kontingen-admin-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 24px;
+  padding: 20px;
+  box-shadow: 0 14px 34px rgba(15, 23, 42, 0.08);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  transition: all 0.22s ease;
+}
+
+.kontingen-admin-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 20px 42px rgba(15, 23, 42, 0.12);
+  border-color: rgba(37, 99, 235, 0.28);
+}
+
+.kontingen-admin-info {
+  min-width: 0;
+}
+
+.kontingen-admin-info h3 {
+  color: #172554;
+  font-size: 18px;
+  font-weight: 950;
+  margin-bottom: 10px;
+  line-height: 1.3;
+}
+
+.kontingen-admin-info p {
+  color: #64748b;
+  font-size: 13px;
+  line-height: 1.5;
+  margin-bottom: 4px;
+}
+
+.kontingen-admin-info strong {
+  color: #334155;
+  font-weight: 850;
+}
+
+.kontingen-admin-actions {
+  flex-shrink: 0;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.data-badge-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.data-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 26px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: #eff6ff;
+  color: #2563eb;
+  border: 1px solid #bfdbfe;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+/* =========================
+   MODAL
+========================= */
+
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.modal.show {
+  display: flex;
+}
+
+.modal-content {
+  width: min(540px, 100%);
+  max-height: calc(100vh - 36px);
+  overflow-y: auto;
+  background: #ffffff;
+  border-radius: 24px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.25);
+}
+
+.modal-header {
+  padding: 18px 20px;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.modal-header h3 {
+  color: #172554;
+  font-size: 19px;
+  font-weight: 950;
+}
+
+.close-btn {
+  width: 34px;
+  height: 34px;
+  border: none;
+  border-radius: 999px;
+  background: #f1f5f9;
+  color: #334155;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.close-btn:hover {
+  background: #e2e8f0;
+}
+
+.modal-body {
+  padding: 20px;
+}
+
+.form-group {
+  margin-bottom: 14px;
+}
+
+.form-group label {
+  display: block;
+  color: #334155;
+  font-size: 13px;
+  font-weight: 850;
+  margin-bottom: 7px;
+}
+
+.form-group input,
+.form-group textarea {
+  width: 100%;
+  min-height: 42px;
+  border: 1px solid #d7e1ee;
+  border-radius: 14px;
+  background: #ffffff;
+  color: #172033;
+  font-size: 13px;
+  padding: 10px 13px;
+  transition: all 0.22s ease;
+}
+
+.form-group textarea {
+  min-height: 92px;
+  resize: vertical;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.10);
+}
+
+.button-group {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+@media (max-width: 1100px) {
+  .kontingen-list {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .page-header .btn-primary {
+    width: 100%;
+  }
+
+  .kontingen-admin-card {
+    border-radius: 18px;
+    padding: 15px;
+    flex-direction: column;
+  }
+
+  .kontingen-admin-actions,
+  .kontingen-admin-actions button {
+    width: 100%;
+  }
+
+  .button-group {
+    flex-direction: column-reverse;
+  }
+
+  .button-group button {
+    width: 100%;
+  }
+}

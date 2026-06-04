@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Export Data - Super Admin ATLET</title>
+
+  <link rel="stylesheet" href="/css/superadmin/export.css">
+  <link rel="stylesheet" href="/css/superadmin/common.css">
+  <link rel="stylesheet" href="/css/alert-style.css">
+  <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
+</head>
+
+<body>
+
+  <header class="header">
+    <div class="header-content">
+      <div class="logo">
+        <h1>🏅 ATLET - Super Admin</h1>
+        <p class="logo-subtitle">Pusat Kontrol Sistem</p>
+      </div>
+
+      <div class="header-actions">
+        <a href="{{ route('profile.edit') }}" class="user-info user-info-link" id="userInfo" title="Pengaturan Profil">
+          👤 {{ $authUser->name ?? 'Super Admin' }}
+        </a>
+        <button class="logout-btn" id="logoutBtn">Logout</button>
+      </div>
+    </div>
+  </header>
+
+  <aside class="sidebar">
+    <nav class="nav-menu">
+      <a class="nav-item" href="{{ route('superadmin.dashboard') }}">📊 Dashboard</a>
+      <a class="nav-item" href="{{ route('superadmin.kontingen.list') }}">🏢 Manajemen Kontingen</a>
+      <a class="nav-item" href="{{ route('superadmin.admins.list') }}">👥 Manajemen Admin</a>
+      <a class="nav-item" href="{{ route('superadmin.monitoring') }}">🔍 Monitoring Data</a>
+      <a class="nav-item" href="{{ route('superadmin.activity-log') }}">📝 Activity Log</a>
+      <a class="nav-item active" href="{{ route('superadmin.export') }}">📥 Export Data</a>
+      <a class="nav-item" href="{{ route('superadmin.settings') }}">⚙️ Pengaturan</a>
+    </nav>
+  </aside>
+
+  <main class="container">
+    <section class="page active">
+      <h2>📥 Export Data Global</h2>
+
+      <div class="export-section">
+        <h3>Pilih Data yang Ingin Di-Export</h3>
+
+        <div class="export-options">
+          <div class="export-card">
+            <h4>📊 Data Atlet</h4>
+            <p>Semua atlet dari semua kontingen</p>
+            <button class="btn-primary" onclick="exportData('atlet', 'excel')">Excel</button>
+            <button class="btn-secondary" onclick="exportData('atlet', 'csv')">CSV</button>
+          </div>
+
+          <div class="export-card">
+            <h4>📋 Absensi</h4>
+            <p>Rekam absensi keseluruhan</p>
+            <button class="btn-primary" onclick="exportData('absensi', 'excel')">Excel</button>
+            <button class="btn-secondary" onclick="exportData('absensi', 'csv')">CSV</button>
+          </div>
+
+          <div class="export-card">
+            <h4>📅 Jadwal Pertandingan</h4>
+            <p>Semua jadwal dari semua kontingen</p>
+            <button class="btn-primary" onclick="exportData('jadwal', 'excel')">Excel</button>
+            <button class="btn-secondary" onclick="exportData('jadwal', 'csv')">CSV</button>
+          </div>
+
+          <div class="export-card">
+            <h4>📚 Program Latihan</h4>
+            <p>Semua program dari semua kontingen</p>
+            <button class="btn-primary" onclick="exportData('program', 'excel')">Excel</button>
+            <button class="btn-secondary" onclick="exportData('program', 'csv')">CSV</button>
+          </div>
+
+          <div class="export-card">
+            <h4>👨‍🏫 Data Pelatih</h4>
+            <p>Semua pelatih dari semua kontingen</p>
+            <button class="btn-primary" onclick="exportData('pelatih', 'excel')">Excel</button>
+            <button class="btn-secondary" onclick="exportData('pelatih', 'csv')">CSV</button>
+          </div>
+
+          <div class="export-card">
+            <h4>📏 Hasil Tes Pengukuran</h4>
+            <p>Semua hasil tes pengukuran atlet</p>
+            <button class="btn-primary" onclick="exportData('pengukuran', 'excel')">Excel</button>
+            <button class="btn-secondary" onclick="exportData('pengukuran', 'csv')">CSV</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="/js/custom-alert.js"></script>
+  <script src="/js/superadmin/common.js"></script>
+  <script src="/js/superadmin/export.js"></script>
+</body>
+
+</html>
