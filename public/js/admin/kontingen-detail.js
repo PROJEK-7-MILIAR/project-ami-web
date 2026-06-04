@@ -487,6 +487,7 @@ function renderFileList(list, containerId, type) {
         return `
             <div class="program-item" style="display: flex; align-items: flex-start; gap: 15px;">
                 <input type="checkbox" class="checkbox-${type}" value="${file.id}" style="width: 18px; height: 18px; cursor: pointer; margin-top: 14px;">
+
                 <div style="display: flex; align-items: flex-start; flex: 1;">
                     <div class="program-item-icon">${icon}</div>
                     <div class="program-info">
@@ -506,6 +507,7 @@ function renderFileList(list, containerId, type) {
                     </button>
 
                     <button onclick="window.location.href='/admin/file/${file.id}/download'">📥 Download</button>
+
                     ${owner
                         ? `<button class="delete" onclick="deleteFile(${file.id})">🗑 Hapus</button>`
                         : `<button disabled style="opacity: 0.5;">🔒 Terkunci</button>`}
@@ -539,6 +541,21 @@ window.previewFile = function(url, ext, name, id) {
     else if (extension === 'pdf') {
         iframe.src = url;
         iframe.style.display = 'block';
+    }
+    else if (['xls', 'xlsx', 'csv', 'doc', 'docx', 'ppt', 'pptx'].includes(extension)) {
+
+        // ========================================================
+        // RENDER EXCEL/WORD/PPT MENGGUNAKAN MICROSOFT VIEWER
+        // ========================================================
+
+        const fullFileUrl = window.location.origin + url;
+
+        const microsoftViewerUrl = `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(fullFileUrl)}`;
+
+        iframe.src = microsoftViewerUrl;
+        iframe.style.display = 'block';
+
+        notify('Memuat dokumen dari Microsoft Viewer...', 'info', 1500);
     }
     else {
         extSpan.innerText = extension;

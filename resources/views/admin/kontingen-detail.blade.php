@@ -568,6 +568,33 @@
     </div>
   </div>
 
+  <div id="previewModal" class="modal">
+    <div class="modal-content" style="width: 85%; max-width: 1000px; height: 85vh; display: flex; flex-direction: column; padding: 0; overflow: hidden;">
+
+      <div class="modal-header" style="padding: 16px 24px; border-bottom: 1px solid #e2e8f0; background: #fff; z-index: 10;">
+        <h3 id="previewTitle" style="margin: 0; font-size: 18px; color: #1e3a8a;">Preview File</h3>
+        <button class="close-btn" onclick="closeModal('previewModal')" style="margin: 0;">&times;</button>
+      </div>
+
+      <div class="modal-body" style="flex: 1; padding: 0; background: #f8fafc; display: flex; justify-content: center; align-items: center; position: relative;">
+
+          <img id="previewImage" style="display: none; max-width: 100%; max-height: 100%; object-fit: contain;" src="" alt="Preview">
+
+          <iframe id="previewIframe" style="display: none; width: 100%; height: 100%; border: none; background: #fff;" src=""></iframe>
+
+          <div id="previewFallback" style="display: none; text-align: center; padding: 40px;">
+              <div style="font-size: 54px; margin-bottom: 12px;">📄</div>
+              <h4 style="color: #1e293b; margin-bottom: 8px; font-size: 18px;">Preview Tidak Tersedia</h4>
+              <p style="color: #64748b; font-size: 14px; margin-bottom: 24px;">
+                  Format file <strong id="previewExt" style="text-transform: uppercase;"></strong> tidak dapat ditampilkan.<br>Silakan download file untuk membukanya.
+              </p>
+              <button class="btn-primary" id="previewDownloadBtn">📥 Download File</button>
+          </div>
+
+      </div>
+    </div>
+  </div>
+
   <script src="/js/custom-alert.js"></script>
   <form id="logoutForm" method="POST" action="{{ route('logout') }}" hidden>
     @csrf
