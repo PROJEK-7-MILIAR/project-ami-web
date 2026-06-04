@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Superadmin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
+use Illuminate\Auth\Events\Registered;
 
 class AdminManagemetController extends Controller
 {
@@ -29,6 +30,9 @@ class AdminManagemetController extends Controller
             'password'=> bcrypt($request->password),
             'role' => 'admin',
         ]);
+
+        event(new Registered($user));
+
         return response()->json([
         'message' => 'Admin berhasil ditambahkan',
         'data' => $user

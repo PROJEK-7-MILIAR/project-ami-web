@@ -1,6 +1,8 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Foundation\Auth\EmailVerificationRequest;
+use Illuminate\Http\Request;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Superadmin\DashboardController;
@@ -30,6 +32,19 @@ Route::middleware('guest')->group(function () {
     Route::post('/login', [LoginController::class, 'authenticate'])->name('login.authenticate');
 });
 
+// Email Verification Routes
+Route::get('/email/verify', function () {
+    return view('auth.verify-email');
+})->middleware('auth')->name('verification.notice');
+Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
+    $request->fulfill();
+    return redirect('/admin/dashboard');
+})->middleware(['auth', 'signed'])->name('verification.verify');
+Route::post('/email/verification-notification', function (Request $request) {
+    $request->user()->sendEmailVerificationNotification();
+    return back()->with('message', 'Link verifikasi telah dikirim ulang!');
+})->middleware(['auth', 'throttle:6,1'])->name('verification.send');
+
 // Authenticated Routes
 Route::middleware('auth')->group(function () {
 
@@ -38,7 +53,7 @@ Route::middleware('auth')->group(function () {
     // =========================================================
     // SUPERADMIN ROUTES
     // =========================================================
-    Route::middleware('role:superadmin')->group(function () {
+    Route::middleware(['role:superadmin', 'verified'])->group(function () {
 
         Route::get('/superadmin/dashboard', function () {
             return view('superadmin.dashboard');
@@ -92,7 +107,7 @@ Route::middleware('auth')->group(function () {
     // =========================================================
     // ADMIN ROUTES
     // =========================================================
-    Route::middleware('role:admin')->group(function () {
+    Route::middleware(['role:admin', 'verified'])->group(function () {
 
         // Dashboard Admin
         Route::get('/admin/dashboard', function () {
