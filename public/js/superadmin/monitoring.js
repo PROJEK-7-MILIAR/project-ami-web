@@ -21,6 +21,26 @@ function escapeHTML(str) {
         .replace(/'/g, '&#039;');
 }
 
+function parseDynamicFields(dynamicFields) {
+    let fields = dynamicFields;
+    if (typeof fields === 'string') {
+        try { fields = JSON.parse(fields); } catch(e) { fields = []; }
+    }
+
+    if (fields && Array.isArray(fields) && fields.length > 1) {
+        return fields.map((field, index) => {
+            if (index === 0) return ''; // Skip baris pertama karena itu adalah Nama Utama
+            return `
+                <div style="font-size: 12px; margin-bottom: 4px; line-height: 1.4;">
+                    <span style="color: #64748b; font-weight: 600;">${escapeHTML(field.label)}:</span>
+                    <span style="color: #1e3a8a; font-weight: 700;">${escapeHTML(field.value)}</span>
+                </div>
+            `;
+        }).join('');
+    }
+    return '<span style="color: #94a3b8; font-style: italic;">Tidak ada detail</span>';
+}
+
 async function renderMonitoring(tab) {
     const container = document.getElementById('monitoringContent');
     if (!container) return;
@@ -58,8 +78,7 @@ function renderPelatih(data, container) {
         <tr>
             <td><strong>${escapeHTML(item.kontingen?.name || '-')}</strong></td>
             <td>${escapeHTML(item.nama)}</td>
-            <td>${item.usia ? escapeHTML(item.usia) + ' thn' : '-'}</td>
-            <td>${item.ttl ? escapeHTML(item.ttl) : '-'}</td>
+            <td>${parseDynamicFields(item.dynamic_fields)}</td>
             <td>${escapeHTML(item.creator?.name || '-')}</td>
         </tr>
     `).join('');
@@ -71,9 +90,7 @@ function renderPelatih(data, container) {
                 <tr>
                     <th>Kontingen</th>
                     <th>Nama Pelatih</th>
-                    <th>Usia</th>
-                    <th>Tgl Lahir</th>
-                    <th>Dibuat Oleh</th>
+                    <th>Informasi Detail</th> <th>Dibuat Oleh</th>
                 </tr>
             </thead>
             <tbody>${rows}</tbody>
@@ -90,8 +107,7 @@ function renderAtlet(data, container) {
         <tr>
             <td><strong>${escapeHTML(item.kontingen?.name || '-')}</strong></td>
             <td>${escapeHTML(item.nama)}</td>
-            <td>${item.usia ? escapeHTML(item.usia) + ' thn' : '-'}</td>
-            <td>${item.ttl ? escapeHTML(item.ttl) : '-'}</td>
+            <td>${parseDynamicFields(item.dynamic_fields)}</td>
             <td>${escapeHTML(item.creator?.name || '-')}</td>
         </tr>
     `).join('');
@@ -103,9 +119,7 @@ function renderAtlet(data, container) {
                 <tr>
                     <th>Kontingen</th>
                     <th>Nama Atlet</th>
-                    <th>Usia</th>
-                    <th>Tgl Lahir</th>
-                    <th>Dibuat Oleh</th>
+                    <th>Informasi Detail</th> <th>Dibuat Oleh</th>
                 </tr>
             </thead>
             <tbody>${rows}</tbody>
