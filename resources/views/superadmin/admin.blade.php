@@ -8,6 +8,7 @@
   <title>Manajemen Admin - Super Admin ATLET</title>
 
   <link rel="stylesheet" href="/css/superadmin/admin.css">
+  <link rel="stylesheet" href="/css/superadmin/common.css">
   <link rel="stylesheet" href="/css/alert-style.css">
   <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
 
