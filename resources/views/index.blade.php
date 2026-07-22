@@ -377,19 +377,19 @@
         <div class="showcase-right">
           <h2>Kontak Kami</h2>
 
-          <a href="mailto:info@atletnasional.id" class="contact-card contact-card--email">
+          <a href="mailto:websitedatapelatihdanatlet@gmail.com" class="contact-card contact-card--email">
             <div class="contact-card-icon">✉️</div>
             <div class="contact-card-text">
               <h3>Email</h3>
-              <p>info@atletnasional.id</p>
+              <p>websitedatapelatihdanatlet@gmail.com</p>
             </div>
           </a>
 
-          <a href="https://wa.me/6281234567890" target="_blank" class="contact-card contact-card--whatsapp">
+          <a href="https://wa.me/6285168865328" target="_blank" class="contact-card contact-card--whatsapp">
             <div class="contact-card-icon">💬</div>
             <div class="contact-card-text">
               <h3>WhatsApp</h3>
-              <p>+62 812-3456-7890</p>
+              <p>+62 851-6886-5328</p>
             </div>
           </a>
         </div>
