@@ -442,7 +442,7 @@ async function submitFileData(type, formId, modalId) {
 
     const btn = document.querySelector(`#${formId} button[type="submit"]`);
     const oldText = btn.innerHTML;
-    btn.disabled = true; btn.innerHTML = '⏳ Uploading...';
+    btn.disabled = true; btn.innerHTML = '<span class="btn-spinner"></span> Uploading...';
 
     try {
         const response = await fetch(`/admin/kontingen/${KONTINGEN_ID}/file`, {
