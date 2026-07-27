@@ -1,4 +1,4 @@
-
+﻿
 * {
   margin: 0;
   padding: 0;
@@ -1166,23 +1166,23 @@ select {
   }
 }
 
- / *   = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = 
-       S P I N N E R   A N I M A T I O N 
- = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =   * / 
- . b t n - s p i n n e r   { 
-     d i s p l a y :   i n l i n e - b l o c k ; 
-     w i d t h :   1 r e m ; 
-     h e i g h t :   1 r e m ; 
-     v e r t i c a l - a l i g n :   t e x t - b o t t o m ; 
-     b o r d e r :   0 . 2 e m   s o l i d   c u r r e n t C o l o r ; 
-     b o r d e r - r i g h t - c o l o r :   t r a n s p a r e n t ; 
-     b o r d e r - r a d i u s :   5 0 % ; 
-     a n i m a t i o n :   s p i n n e r - b o r d e r   . 7 5 s   l i n e a r   i n f i n i t e ; 
-     m a r g i n - r i g h t :   5 p x ; 
- } 
- 
- @ k e y f r a m e s   s p i n n e r - b o r d e r   { 
-     t o   {   t r a n s f o r m :   r o t a t e ( 3 6 0 d e g ) ;   } 
- } 
-  
- 
+
+/* =========================================================
+   SPINNER ANIMATION
+========================================================= */
+.btn-spinner {
+  display: inline-block;
+  width: 1rem;
+  height: 1rem;
+  vertical-align: text-bottom;
+  border: 0.2em solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: spinner-border .75s linear infinite;
+  margin-right: 5px;
+}
+
+@keyframes spinner-border {
+  to { transform: rotate(360deg); }
+}
+
