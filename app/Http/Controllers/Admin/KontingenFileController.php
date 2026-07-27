@@ -17,7 +17,7 @@ class KontingenFileController extends Controller
             'type' => 'required|in:program,laporan,laporantes',
             'nama' => 'required|string|max:255',
             'desc' => 'nullable|string',
-            'file' => 'required|file|mimes:pdf,xlsx,xls,csv,txt|max:5120',
+            'file' => 'required|file|mimes:pdf,xlsx,xls,csv,txt|max:102400',
         ]);
 
         $file = $request->file('file');
