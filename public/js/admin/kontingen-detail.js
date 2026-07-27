@@ -425,6 +425,35 @@ async function uploadProgram(e) { e.preventDefault(); await submitFileData('prog
 async function uploadLaporanBulanan(e) { e.preventDefault(); await submitFileData('laporan', 'uploadLaporanForm', 'uploadLaporanModal'); }
 async function uploadLaporanTes(e) { e.preventDefault(); await submitFileData('laporantes', 'uploadLaporanTesForm', 'uploadLaporanTesModal'); }
 
+function showUploadProgress() {
+    const overlay = document.createElement('div');
+    overlay.id = 'uploadProgressOverlay';
+    overlay.innerHTML = `
+        <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(4px);">
+            <div style="background: white; padding: 24px; border-radius: 12px; width: 350px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); text-align: center; font-family: sans-serif;">
+                <h3 style="margin-top: 0; margin-bottom: 16px; color: #1e293b; font-size: 18px; font-weight: 700;">Mengupload File...</h3>
+                <div style="width: 100%; background: #e2e8f0; border-radius: 999px; height: 12px; overflow: hidden; margin-bottom: 12px;">
+                    <div id="uploadProgressBar" style="width: 0%; height: 100%; background: #2563eb; transition: width 0.2s ease;"></div>
+                </div>
+                <div id="uploadProgressText" style="font-weight: 600; color: #475569; font-size: 14px;">0%</div>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(overlay);
+}
+
+function updateUploadProgress(percent) {
+    const bar = document.getElementById('uploadProgressBar');
+    const txt = document.getElementById('uploadProgressText');
+    if(bar) bar.style.width = percent + '%';
+    if(txt) txt.innerText = percent + '%';
+}
+
+function hideUploadProgress() {
+    const overlay = document.getElementById('uploadProgressOverlay');
+    if(overlay) overlay.remove();
+}
+
 async function submitFileData(type, formId, modalId) {
     const prefix = type === 'program' ? 'program' : (type === 'laporan' ? 'laporan' : 'laporantes');
 
@@ -443,23 +472,51 @@ async function submitFileData(type, formId, modalId) {
     const btn = document.querySelector(`#${formId} button[type="submit"]`);
     const oldText = btn.innerHTML;
     btn.disabled = true; btn.innerHTML = '<span class="btn-spinner"></span> Uploading...';
+    showUploadProgress();
 
     try {
-        const response = await fetch(`/admin/kontingen/${KONTINGEN_ID}/file`, {
-            method: 'POST',
-            headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': CSRF_TOKEN },
-            body: formData
-        });
+        const response = await new Promise((resolve, reject) => {
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', `/admin/kontingen/${KONTINGEN_ID}/file`, true);
+            xhr.setRequestHeader('Accept', 'application/json');
+            xhr.setRequestHeader('X-CSRF-TOKEN', CSRF_TOKEN);
 
-        if (!response.ok) throw new Error();
+            xhr.upload.onprogress = function(e) {
+                if (e.lengthComputable) {
+                    const percentComplete = Math.round((e.loaded / e.total) * 100);
+                    updateUploadProgress(percentComplete);
+                }
+            };
+
+            xhr.onload = function() {
+                if (xhr.status >= 200 && xhr.status < 300) {
+                    resolve(JSON.parse(xhr.responseText));
+                } else if (xhr.status === 413) {
+                    reject(new Error('File Terlalu Besar (Maksimal tercapai di server Nginx/Cloudflare).'));
+                } else {
+                    reject(new Error(xhr.statusText || 'Upload failed'));
+                }
+            };
+
+            xhr.onerror = function() {
+                reject(new Error('Network error. Periksa koneksi internet Anda.'));
+            };
+
+            xhr.send(formData);
+        });
 
         document.getElementById(formId).reset();
         closeModal(modalId);
         notify('File berhasil diupload.', 'success');
         await loadDetailData();
     } catch (error) {
-        notify('Gagal mengupload file.', 'error');
+        if (error.message.includes('Terlalu Besar')) {
+            notify(error.message, 'error');
+        } else {
+            notify('Gagal mengupload file.', 'error');
+        }
     } finally {
+        hideUploadProgress();
         btn.disabled = false; btn.innerHTML = oldText;
     }
 }
